@@ -69,6 +69,9 @@ function ToBudget({ toBudget, onPress, show3Cols }) {
   const amount = useSheetValue(toBudget);
   const format = useFormat();
   const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
+  const [hideFraction] = useSyncedPref('hideFraction');
+
+  const isNegative = hideFraction ? Math.round(num) < 0 : num < 0;
 
   return (
     <View
@@ -82,9 +85,9 @@ function ToBudget({ toBudget, onPress, show3Cols }) {
       <Button variant="bare" onPress={onPress}>
         <View>
           <Label
-            title={amount < 0 ? 'Overbudgeted' : 'To Budget'}
+            title={isNegative ? 'Overbudgeted' : 'To Budget'}
             style={{
-              ...(amount < 0 ? styles.smallText : {}),
+              ...(isNegative ? styles.smallText : {}),
               color: theme.formInputText,
               flexShrink: 0,
               textAlign: 'left',
@@ -103,7 +106,7 @@ function ToBudget({ toBudget, onPress, show3Cols }) {
                     style={{
                       fontSize: 12,
                       fontWeight: '700',
-                      color: amount < 0 ? theme.errorText : theme.formInputText,
+                      color: isNegative ? theme.errorText : theme.formInputText,
                     }}
                   >
                     {format(value, type)}
@@ -134,7 +137,8 @@ function Saved({ projected, onPress, show3Cols }) {
 
   const saved = useSheetValue(binding) || 0;
   const format = useFormat();
-  const isNegative = saved < 0;
+  const [hideFraction] = useSyncedPref('hideFraction');
+  const isNegative = hideFraction ? Math.round(saved) < 0 : saved < 0;
   const sidebarColumnWidth = getColumnWidth({ show3Cols, isSidebar: true });
 
   return (

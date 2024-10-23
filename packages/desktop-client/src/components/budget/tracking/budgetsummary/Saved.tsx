@@ -14,6 +14,7 @@ import { PrivacyFilter } from '../../../PrivacyFilter';
 import { useFormat } from '../../../spreadsheet/useFormat';
 import { makeAmountFullStyle } from '../../util';
 import { useTrackingSheetValue } from '../TrackingBudgetComponents';
+import { useSyncedPref } from '../../../../hooks/useSyncedPref';
 
 type SavedProps = {
   projected: boolean;
@@ -25,8 +26,10 @@ export function Saved({ projected, style }: SavedProps) {
     useTrackingSheetValue(trackingBudget.totalBudgetedSaved) || 0;
   const totalSaved = useTrackingSheetValue(trackingBudget.totalSaved) || 0;
   const format = useFormat();
+  const [hideFraction] = useSyncedPref('hideFraction');
+
   const saved = projected ? budgetedSaved : totalSaved;
-  const isNegative = saved < 0;
+  const isNegative = hideFraction ? Math.round(saved) < 0 : saved < 0;
   const diff = totalSaved - budgetedSaved;
 
   return (

@@ -16,6 +16,7 @@ import {
 } from '../EnvelopeBudgetComponents';
 
 import { TotalsList } from './TotalsList';
+import { useSyncedPref } from '../../../../hooks/useSyncedPref';
 
 type ToBudgetAmountProps = {
   prevMonthName: string;
@@ -44,8 +45,10 @@ export function ToBudgetAmount({
       'Expected availableValue to be a number but got ' + availableValue,
     );
   }
+  const [hideFraction] = useSyncedPref('hideFraction');
+
   const num = availableValue ?? 0;
-  const isNegative = num < 0;
+  const isNegative = hideFraction ? Math.round(num) < 0 : num < 0;
 
   return (
     <View style={{ alignItems: 'center', ...style }}>
