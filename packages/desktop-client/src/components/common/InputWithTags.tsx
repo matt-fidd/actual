@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from 'react';
 
-import { css } from 'glamor';
+import { css } from '@emotion/css';
 
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { useTagPopover } from '../../hooks/useTagPopover';

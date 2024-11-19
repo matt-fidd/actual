@@ -13,8 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
-import { getHoverColor, getTextColorForColor } from '../../shared/tag';
 import * as monthUtils from '../../shared/months';
+import { getHoverColor, getTextColorForColor } from '../../shared/tag';
 import { groupById } from '../../shared/util';
 import {
   CategoryEntity,
@@ -330,7 +330,7 @@ export async function insertCategoryGroup(group) {
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}Ã¢ÂÂ${existingGroup.name}Ã¢ÂÂ category group already exists.`,
+      `A ${existingGroup.hidden ? 'hidden ' : ''}â${existingGroup.name}â category group already exists.`,
     );
   }
 
@@ -388,7 +388,7 @@ export async function insertCategory(
     );
     if (existingCatInGroup) {
       throw new Error(
-        `Category Ã¢ÂÂ${category.name}Ã¢ÂÂ already exists in group Ã¢ÂÂ${category.cat_group}Ã¢ÂÂ`,
+        `Category â${category.name}â already exists in group â${category.cat_group}â`,
       );
     }
 
@@ -764,6 +764,7 @@ function extractTagsFromNotes(notes) {
   });
 
   return tags;
+}
 
 function toSqlQueryParameters(params: unknown[]) {
   return params.map(() => '?').join(',');

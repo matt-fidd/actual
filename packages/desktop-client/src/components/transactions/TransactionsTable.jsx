@@ -2771,11 +2771,10 @@ function NotesTagFormatter(notes, onNotesTagClick, onContextMenu) {
                     color: filteredTags[0]?.textColor ?? theme.noteTagText,
                     cursor: 'pointer',
                     '&[data-hovered]': {
-                        backgroundColor:
-                          filteredTags[0]?.hoverColor ??
-                          theme.noteTagBackgroundHover,
-                        color:
-                          filteredTags[0]?.textColor ?? theme.noteTagText,
+                      backgroundColor:
+                        filteredTags[0]?.hoverColor ??
+                        theme.noteTagBackgroundHover,
+                      color: filteredTags[0]?.textColor ?? theme.noteTagText,
                     },
                   })}
                   onPress={() => {

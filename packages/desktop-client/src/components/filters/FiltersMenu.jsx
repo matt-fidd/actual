@@ -193,6 +193,8 @@ function ConfigureField({
           </>
         )}
       </Stack>
+
+      <Form action="#">
         {type !== 'boolean' && (
           <GenericInput
             inputRef={inputRef}
@@ -201,8 +203,8 @@ function ConfigureField({
             type={
               type === 'id' &&
               (op === 'contains' ||
-                op === 'matches' ||
                 op === 'doesNotContain' ||
+                op === 'matches' ||
                 op === 'hasTags')
                 ? 'string'
                 : type
@@ -223,7 +225,18 @@ function ConfigureField({
           style={{ marginTop: 15 }}
         >
           <View style={{ flex: 1 }} />
-          <Button variant="primary" type="submit">
+          <Button
+            type="primary"
+            onClick={e => {
+              e.preventDefault();
+              onApply({
+                field,
+                op,
+                value,
+                options: subfieldToOptions(field, subfield),
+              });
+            }}
+          >
             <Trans>Apply</Trans>
           </Button>
         </Stack>

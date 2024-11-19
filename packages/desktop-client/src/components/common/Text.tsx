@@ -8,12 +8,12 @@ import React, {
   type CSSProperties,
 } from 'react';
 
+import { css, cx } from '@emotion/css';
+
 import { extractAllTags } from '../../../../loot-core/src/shared/tag';
 import { type TagEntity } from '../../../../loot-core/src/types/models/tag';
 import { useTags } from '../../hooks/useTags';
 import { theme } from '../../style';
-
-import { css, cx } from '@emotion/css';
 
 type TextProps = HTMLProps<HTMLSpanElement> & {
   innerRef?: Ref<HTMLSpanElement>;
@@ -168,7 +168,6 @@ const TextWithTags = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
     >
       {typeof children === 'string' ? ProcessText(children, tags) : children}
     </span>
-    />
   );
 });
 

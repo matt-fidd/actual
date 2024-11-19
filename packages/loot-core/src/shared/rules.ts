@@ -81,6 +81,7 @@ export const FIELD_TYPES = new Map<keyof FieldValueTypes, string>(
     field as unknown as keyof FieldValueTypes,
     info.type,
   ]),
+);
 
 export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
   const type = FIELD_TYPES.get(field);
