@@ -107,7 +107,7 @@ export function Value<T>({
             }
           }
 
-          return '…';
+          return 'â¦';
         default:
           throw new Error(`Unknown field ${field}`);
       }
@@ -183,18 +183,13 @@ export function Value<T>({
     const { num1, num2 } = value;
     return (
       <Text>
-<<<<<<< HEAD
         <Text textWithTags={textWithTags} style={valueStyle}>
           {formatValue(num1)}
-        </Text>{' '}
-        and{' '}
+        </Text>
+        {t('and')}{' '}
         <Text textWithTags={textWithTags} style={valueStyle}>
           {formatValue(num2)}
         </Text>
-=======
-        <Text style={valueStyle}>{formatValue(num1)}</Text> {t('and')}{' '}
-        <Text style={valueStyle}>{formatValue(num2)}</Text>
->>>>>>> master
       </Text>
     );
   } else {

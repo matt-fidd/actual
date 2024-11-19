@@ -39,21 +39,6 @@ const TYPE_INFO = {
       'doesNotContain',
       'notOneOf',
       'hasTags',
-<<<<<<< HEAD
-    ],
-    nullable: true,
-  },
-  imported_payee: {
-    ops: [
-      'is',
-      'contains',
-      'matches',
-      'oneOf',
-      'isNot',
-      'doesNotContain',
-      'notOneOf',
-=======
->>>>>>> master
     ],
     nullable: true,
   },
@@ -91,30 +76,11 @@ const FIELD_INFO = {
 
 const fieldInfo: FieldInfoConstraint = FIELD_INFO;
 
-<<<<<<< HEAD
-export const FIELD_TYPES = new Map(
-  Object.entries({
-    imported_payee: 'imported_payee',
-    payee: 'id',
-    date: 'date',
-    notes: 'string',
-    amount: 'number',
-    amountInflow: 'number',
-    amountOutfow: 'number',
-    category: 'id',
-    account: 'id',
-    cleared: 'boolean',
-    reconciled: 'boolean',
-    saved: 'saved',
-  }),
-=======
 export const FIELD_TYPES = new Map<keyof FieldValueTypes, string>(
   Object.entries(FIELD_INFO).map(([field, info]) => [
     field as unknown as keyof FieldValueTypes,
     info.type,
   ]),
->>>>>>> master
-);
 
 export function isValidOp(field: keyof FieldValueTypes, op: RuleConditionOp) {
   const type = FIELD_TYPES.get(field);
@@ -181,15 +147,9 @@ export function friendlyOp(op, type?) {
     case 'isbetween':
       return t('is between');
     case 'contains':
-<<<<<<< HEAD
-      return 'contains';
-    case 'hasTags':
-      return 'has tag(s)';
-=======
       return t('contains');
     case 'hasTags':
       return t('has tag(s)');
->>>>>>> master
     case 'matches':
       return t('matches');
     case 'doesNotContain':

@@ -1,16 +1,9 @@
 import {
-<<<<<<< HEAD
   type ElementType,
   useState,
   type ComponentProps,
   type ReactNode,
   type FocusEvent,
-=======
-  useState,
-  type ComponentProps,
-  type ReactNode,
-  type CSSProperties,
->>>>>>> master
 } from 'react';
 
 import { theme } from '../../style';

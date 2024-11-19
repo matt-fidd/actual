@@ -49,11 +49,8 @@ import {
   titleFirst,
 } from 'loot-core/src/shared/util';
 
-<<<<<<< HEAD
 import { TAGCOLORS } from '../../../../loot-core/src/shared/tag';
-=======
 import { useFeatureFlag } from '../../hooks/useFeatureFlag';
->>>>>>> master
 import { useMergedRefs } from '../../hooks/useMergedRefs';
 import { usePrevious } from '../../hooks/usePrevious';
 import { useProperFocus } from '../../hooks/useProperFocus';
@@ -321,7 +318,7 @@ const TransactionHeader = memo(
         )}
         {showCleared && (
           <HeaderCell
-            value="✓"
+            value="â"
             width={38}
             alignItems="center"
             id="cleared"
@@ -2759,16 +2756,11 @@ function NotesTagFormatter(notes, onNotesTagClick, onContextMenu) {
                   data-is-tag={true}
                   variant="bare"
                   key={i}
-<<<<<<< HEAD
                   title={validTag}
-                  style={({ isHovered }) => ({
+                  className={css({
                     display: 'inline-block',
                     overflow: 'hidden',
                     whiteSpace: 'nowrap',
-=======
-                  className={css({
-                    display: 'inline-flex',
->>>>>>> master
                     padding: '3px 7px',
                     borderRadius: 16,
                     userSelect: 'none',
@@ -2778,21 +2770,13 @@ function NotesTagFormatter(notes, onNotesTagClick, onContextMenu) {
                       filteredTags[0]?.color ?? theme.noteTagBackground,
                     color: filteredTags[0]?.textColor ?? theme.noteTagText,
                     cursor: 'pointer',
-<<<<<<< HEAD
-                    ...(isHovered
-                      ? {
-                          backgroundColor:
-                            filteredTags[0]?.hoverColor ??
-                            theme.noteTagBackgroundHover,
-                          color:
-                            filteredTags[0]?.textColor ?? theme.noteTagText,
-                        }
-                      : {}),
-=======
                     '&[data-hovered]': {
-                      backgroundColor: theme.noteTagBackgroundHover,
+                        backgroundColor:
+                          filteredTags[0]?.hoverColor ??
+                          theme.noteTagBackgroundHover,
+                        color:
+                          filteredTags[0]?.textColor ?? theme.noteTagText,
                     },
->>>>>>> master
                   })}
                   onPress={() => {
                     onNotesTagClick?.(validTag);

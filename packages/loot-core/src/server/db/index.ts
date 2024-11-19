@@ -13,11 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
-<<<<<<< HEAD
 import { getHoverColor, getTextColorForColor } from '../../shared/tag';
-=======
 import * as monthUtils from '../../shared/months';
->>>>>>> master
 import { groupById } from '../../shared/util';
 import {
   CategoryEntity,
@@ -333,7 +330,7 @@ export async function insertCategoryGroup(group) {
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}’${existingGroup.name}’ category group already exists.`,
+      `A ${existingGroup.hidden ? 'hidden ' : ''}Ã¢ÂÂ${existingGroup.name}Ã¢ÂÂ category group already exists.`,
     );
   }
 
@@ -391,7 +388,7 @@ export async function insertCategory(
     );
     if (existingCatInGroup) {
       throw new Error(
-        `Category ‘${category.name}’ already exists in group ‘${category.cat_group}’`,
+        `Category Ã¢ÂÂ${category.name}Ã¢ÂÂ already exists in group Ã¢ÂÂ${category.cat_group}Ã¢ÂÂ`,
       );
     }
 
@@ -711,7 +708,6 @@ export async function deleteTransaction(transaction) {
   return delete_('transactions', transaction.id);
 }
 
-<<<<<<< HEAD
 export async function getTags() {
   return await all(`
     SELECT id, tag, color, textColor, hoverColor FROM tags
@@ -768,8 +764,7 @@ function extractTagsFromNotes(notes) {
   });
 
   return tags;
-=======
+
 function toSqlQueryParameters(params: unknown[]) {
   return params.map(() => '?').join(',');
->>>>>>> master
 }

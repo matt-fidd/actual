@@ -176,7 +176,7 @@ const CONDITION_TYPES = {
         assert(
           parsed.type === 'date' || parsed.type === 'recur',
           'date-format',
-          `Invalid date value for “isapprox” (field: ${fieldName})`,
+          `Invalid date value for âisapproxâ (field: ${fieldName})`,
         );
       }
       // These only work with exact dates
@@ -184,7 +184,7 @@ const CONDITION_TYPES = {
         assert(
           parsed.type === 'date',
           'date-format',
-          `Invalid date value for “${op}” (field: ${fieldName})`,
+          `Invalid date value for â${op}â (field: ${fieldName})`,
         );
       }
 
@@ -283,24 +283,17 @@ const CONDITION_TYPES = {
         return value.filter(Boolean).map(val => val.toLowerCase());
       }
 
-<<<<<<< HEAD
-=======
       assert(
         typeof value === 'string',
         'not-string',
         `Invalid string value (field: ${fieldName})`,
       );
 
->>>>>>> master
       if (
         op === 'contains' ||
         op === 'matches' ||
         op === 'doesNotContain' ||
-<<<<<<< HEAD
-        op === 'tags'
-=======
         op === 'hasTags'
->>>>>>> master
       ) {
         assert(
           value.length > 0,
@@ -333,13 +326,13 @@ const CONDITION_TYPES = {
         assert(
           parsed.type === 'between',
           'number-format',
-          `Invalid between value for “${op}” (field: ${fieldName})`,
+          `Invalid between value for â${op}â (field: ${fieldName})`,
         );
       } else {
         assert(
           parsed.type === 'literal',
           'number-format',
-          `Invalid number value for “${op}” (field: ${fieldName})`,
+          `Invalid number value for â${op}â (field: ${fieldName})`,
         );
       }
 
@@ -516,11 +509,7 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-<<<<<<< HEAD
-        return fieldValue.indexOf(this.value) !== -1;
-=======
         return String(fieldValue).indexOf(this.value) !== -1;
->>>>>>> master
 
       case 'notOneOf':
         if (fieldValue === null) {

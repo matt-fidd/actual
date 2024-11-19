@@ -3,23 +3,17 @@ import React, {
   type Ref,
   type ReactNode,
   forwardRef,
-<<<<<<< HEAD
   useEffect,
   useState,
+  type CSSProperties,
 } from 'react';
-
-import { css } from 'glamor';
 
 import { extractAllTags } from '../../../../loot-core/src/shared/tag';
 import { type TagEntity } from '../../../../loot-core/src/types/models/tag';
 import { useTags } from '../../hooks/useTags';
-import { theme, type CSSProperties } from '../../style';
-=======
-  type CSSProperties,
-} from 'react';
+import { theme } from '../../style';
 
 import { css, cx } from '@emotion/css';
->>>>>>> master
 
 type TextProps = HTMLProps<HTMLSpanElement> & {
   innerRef?: Ref<HTMLSpanElement>;
@@ -170,15 +164,11 @@ const TextWithTags = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
     <span
       {...restProps}
       ref={innerRef ?? ref}
-<<<<<<< HEAD
-      className={`${className} ${css(style)}`}
+      className={cx(className, css(style))}
     >
       {typeof children === 'string' ? ProcessText(children, tags) : children}
     </span>
-=======
-      className={cx(className, css(style))}
     />
->>>>>>> master
   );
 });
 

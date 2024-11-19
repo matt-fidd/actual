@@ -31,12 +31,8 @@ import { SvgDelete, SvgExpandArrow } from '../icons/v0';
 import { SvgCheckmark } from '../icons/v1';
 import { styles, theme } from '../style';
 
-<<<<<<< HEAD
 import { TagPopover } from './autocomplete/TagAutocomplete';
-import { Button } from './common/Button';
-=======
 import { Button } from './common/Button2';
->>>>>>> master
 import { Input } from './common/Input';
 import { Menu, type MenuItem } from './common/Menu';
 import { Popover } from './common/Popover';

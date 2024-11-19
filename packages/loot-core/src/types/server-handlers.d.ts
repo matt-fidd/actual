@@ -17,12 +17,8 @@ import {
   RuleEntity,
   PayeeEntity,
 } from './models';
-<<<<<<< HEAD
 import { TagEntity } from './models/tag';
-import { GlobalPrefs, LocalPrefs } from './prefs';
-=======
 import { GlobalPrefs, MetadataPrefs } from './prefs';
->>>>>>> master
 import { Query } from './query';
 import { EmptyObject } from './util';
 

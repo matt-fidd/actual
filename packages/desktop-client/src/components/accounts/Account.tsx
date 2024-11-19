@@ -1293,11 +1293,7 @@ class AccountInternal extends PureComponent<
     );
   };
 
-<<<<<<< HEAD:packages/desktop-client/src/components/accounts/Account.jsx
-  onConditionsOpChange = value => {
-=======
   onConditionsOpChange = (value: 'and' | 'or') => {
->>>>>>> master:packages/desktop-client/src/components/accounts/Account.tsx
     this.setState({ filterConditionsOp: value });
     this.setState({ filterId: { ...this.state.filterId, status: 'changed' } });
     this.applyFilters([...this.state.filterConditions]);

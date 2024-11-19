@@ -193,22 +193,6 @@ function ConfigureField({
           </>
         )}
       </Stack>
-<<<<<<< HEAD
-      <form action="#">
-=======
-
-      <Form
-        onSubmit={e => {
-          e.preventDefault();
-          onApply({
-            field,
-            op,
-            value,
-            options: subfieldToOptions(field, subfield),
-          });
-        }}
-      >
->>>>>>> master
         {type !== 'boolean' && (
           <GenericInput
             inputRef={inputRef}

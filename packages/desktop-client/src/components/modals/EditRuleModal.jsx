@@ -93,14 +93,10 @@ export function FieldSelect({ fields, style, value, onChange }) {
         options={fields}
         value={value}
         onChange={onChange}
-<<<<<<< HEAD:packages/desktop-client/src/components/modals/EditRule.jsx
-        buttonStyle={{ color: theme.pageTextPositive }}
-=======
         className={css({
           color: theme.pageTextPositive,
           '&[data-hovered]': { color: theme.pageTextPositive },
         })}
->>>>>>> master:packages/desktop-client/src/components/modals/EditRuleModal.jsx
       />
     </View>
   );
@@ -346,11 +342,11 @@ function ScheduleDescription({ id }) {
             noneColor={theme.pageTextLight}
           />
         </Text>
-        <Text style={{ margin: '0 5px' }}> — </Text>
+        <Text style={{ margin: '0 5px' }}> â </Text>
         <Text style={{ flexShrink: 0 }}>
           {t('Amount')}: {formatAmount(schedule._amount)}
         </Text>
-        <Text style={{ margin: '0 5px' }}> — </Text>
+        <Text style={{ margin: '0 5px' }}> â </Text>
         <Text style={{ flexShrink: 0 }}>
           {t('Next')}: {monthUtils.format(schedule.next_date, dateFormat)}
         </Text>
@@ -580,7 +576,7 @@ function ConditionsList({
   onChangeConditions,
 }) {
   function addCondition(index) {
-    // (remove the inflow and outflow pseudo-fields since they’d be a pain to get right)
+    // (remove the inflow and outflow pseudo-fields since theyâd be a pain to get right)
     let fields = conditionFields
       .map(f => f[0])
       .filter(f => f !== 'amount-inflow' && f !== 'amount-outflow');

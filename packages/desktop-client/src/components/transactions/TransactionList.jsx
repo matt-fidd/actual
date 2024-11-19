@@ -1,11 +1,7 @@
 import React, { useRef, useCallback, useLayoutEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-<<<<<<< HEAD
 import { getTags, pushModal } from 'loot-core/client/actions';
-=======
-import { pushModal } from 'loot-core/client/actions';
->>>>>>> master
 import { send } from 'loot-core/src/platform/client/fetch';
 import {
   splitTransaction,

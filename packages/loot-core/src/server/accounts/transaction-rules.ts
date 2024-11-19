@@ -8,16 +8,12 @@ import {
   parseDate,
   dayFromDate,
 } from '../../shared/months';
-<<<<<<< HEAD
 import {
   FIELD_TYPES,
   sortNumbers,
   getApproxNumberThreshold,
 } from '../../shared/rules';
 import { extractAllTags } from '../../shared/tag';
-=======
-import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
->>>>>>> master
 import { ungroupTransaction } from '../../shared/transactions';
 import { partitionByField, fastSetMerge } from '../../shared/util';
 import {
@@ -473,7 +469,6 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags':
-<<<<<<< HEAD
         const tagValues = extractAllTags(value);
 
         return {
@@ -483,28 +478,6 @@ export function conditionsToAQL(conditions, { recurDateBounds = 100 } = {}) {
               '$regexp',
               `(^|\\s|\\w)${escapeRegExp(v)}(\\s|$|#)`,
             );
-=======
-        const words = value.split(/\s+/);
-        const tagValues = [];
-        words.forEach(word => {
-          const startsWithHash = word.startsWith('#');
-          const containsMultipleHash = word.slice(1).includes('#');
-          const correctlyFormatted = word.match(/#[\w\d\p{Emoji}-]+/gu);
-          const validHashtag =
-            startsWithHash && !containsMultipleHash && correctlyFormatted;
-
-          if (validHashtag) {
-            tagValues.push(word);
-          }
-        });
-
-        return {
-          $and: tagValues.map(v => {
-            const regex = new RegExp(
-              `(^|\\s)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`,
-            );
-            return apply(field, '$regexp', regex.source);
->>>>>>> master
           }),
         };
 
