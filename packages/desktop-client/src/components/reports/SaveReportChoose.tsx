@@ -1,4 +1,6 @@
 import React, { createRef, useEffect, useState } from 'react';
+import { Form } from 'react-aria-components';
+import { useTranslation } from 'react-i18next';
 
 import { theme } from '../../style/theme';
 import { Button } from '../common/Button2';
@@ -15,6 +17,7 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
   const inputRef = createRef<HTMLInputElement>();
   const [err, setErr] = useState('');
   const [value, setValue] = useState('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (inputRef.current) {
@@ -24,9 +27,22 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
 
   return (
     <>
-      <form>
+      <Form
+        onSubmit={e => {
+          e.preventDefault();
+
+          if (!value) {
+            setErr('Invalid report entered');
+            return;
+          }
+
+          onApply(value);
+        }}
+      >
         <View style={{ flexDirection: 'row', align: 'center' }}>
-          <Text style={{ userSelect: 'none', flex: 1 }}>Choose Report</Text>
+          <Text style={{ userSelect: 'none', flex: 1 }}>
+            {t('Choose Report')}
+          </Text>
           <View style={{ flex: 1 }} />
         </View>
         <GenericInput
@@ -47,21 +63,11 @@ export function SaveReportChoose({ onApply }: SaveReportChooseProps) {
           style={{ marginTop: 15 }}
         >
           <View style={{ flex: 1 }} />
-          <Button
-            variant="primary"
-            onPress={() => {
-              if (!value) {
-                setErr('Invalid report entered');
-                return;
-              }
-
-              onApply(value);
-            }}
-          >
-            Apply
+          <Button variant="primary" type="submit">
+            {t('Apply')}
           </Button>
         </Stack>
-      </form>
+      </Form>
       {err !== '' ? (
         <Stack direction="row" align="center" style={{ padding: 10 }}>
           <Text style={{ color: theme.errorText }}>{err}</Text>

@@ -17,8 +17,12 @@ import {
   RuleEntity,
   PayeeEntity,
 } from './models';
+<<<<<<< HEAD
 import { TagEntity } from './models/tag';
 import { GlobalPrefs, LocalPrefs } from './prefs';
+=======
+import { GlobalPrefs, MetadataPrefs } from './prefs';
+>>>>>>> master
 import { Query } from './query';
 import { EmptyObject } from './util';
 
@@ -60,21 +64,19 @@ export interface ServerHandlers {
 
   'get-budget-bounds': () => Promise<{ start: string; end: string }>;
 
-  'rollover-budget-month': (arg: { month }) => Promise<
+  'envelope-budget-month': (arg: { month }) => Promise<
     {
       value: string | number | boolean;
       name: string;
     }[]
   >;
 
-  'report-budget-month': (arg: { month }) => Promise<
+  'tracking-budget-month': (arg: { month }) => Promise<
     {
       value: string | number | boolean;
       name: string;
     }[]
   >;
-
-  'budget-set-type': (arg: { type }) => Promise<unknown>;
 
   'category-create': (arg: {
     name;
@@ -200,6 +202,18 @@ export interface ServerHandlers {
 
   'simplefin-accounts': () => Promise<{ accounts: SimpleFinAccount[] }>;
 
+  'simplefin-batch-sync': ({ ids }: { ids: string[] }) => Promise<
+    {
+      accountId: string;
+      res: {
+        errors;
+        newTransactions;
+        matchedTransactions;
+        updatedAccounts;
+      };
+    }[]
+  >;
+
   'gocardless-get-banks': (country: string) => Promise<{
     data: GoCardlessInstitution[];
     error?: { reason: string };
@@ -220,7 +234,7 @@ export interface ServerHandlers {
     | { error: 'failed' }
   >;
 
-  'accounts-bank-sync': (arg: { id?: string }) => Promise<{
+  'accounts-bank-sync': (arg: { ids?: AccountEntity['id'][] }) => Promise<{
     errors;
     newTransactions;
     matchedTransactions;
@@ -246,7 +260,7 @@ export interface ServerHandlers {
 
   'save-prefs': (prefsToSet) => Promise<'ok'>;
 
-  'load-prefs': () => Promise<LocalPrefs | null>;
+  'load-prefs': () => Promise<MetadataPrefs | null>;
 
   'sync-reset': () => Promise<{ error?: { reason: string; meta?: unknown } }>;
 

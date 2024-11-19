@@ -7,9 +7,11 @@ export class SettingsPage {
     await this.page.getByRole('button', { name: 'Export data' }).click();
   }
 
-  async enableExperimentalFeature(featureName) {
-    await this.page.getByTestId('advanced-settings').click();
-    await this.page.getByTestId('experimental-settings').click();
-    await this.page.getByLabel(featureName).check();
+  async useBudgetType(budgetType) {
+    const switchBudgetTypeButton = this.page.getByRole('button', {
+      name: `Switch to ${budgetType} budgeting`,
+    });
+
+    await switchBudgetTypeButton.click();
   }
 }

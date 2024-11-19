@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { t } from 'i18next';
+
 import { send, sendCatch } from 'loot-core/platform/client/fetch/index';
 import { addNotification } from 'loot-core/src/client/actions';
 import { calculateHasWarning } from 'loot-core/src/client/reports';
@@ -9,6 +11,7 @@ import { type CustomReportEntity } from 'loot-core/types/models/reports';
 
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useCategories } from '../../../hooks/useCategories';
+import { useFeatureFlag } from '../../../hooks/useFeatureFlag';
 import { usePayees } from '../../../hooks/usePayees';
 import { useSyncedPref } from '../../../hooks/useSyncedPref';
 import { SvgExclamationSolid } from '../../../icons/v1';
@@ -35,12 +38,18 @@ export function CustomReportListCards({
   report,
   onRemove,
 }: CustomReportListCardsProps) {
+  const isDashboardsFeatureEnabled = useFeatureFlag('dashboards');
+
   // It's possible for a dashboard to reference a non-existing
   // custom report
   if (!report) {
+    if (!isDashboardsFeatureEnabled) {
+      return null;
+    }
+
     return (
       <MissingReportCard isEditing={isEditing} onRemove={onRemove}>
-        This custom report has been deleted.
+        {t('This custom report has been deleted.')}
       </MissingReportCard>
     );
   }
@@ -112,8 +121,7 @@ function CustomReportListCardsInner({
   return (
     <ReportCard
       isEditing={isEditing}
-      to="/reports/custom"
-      report={report}
+      to={`/reports/custom/${report.id}`}
       menuItems={[
         {
           name: 'rename',

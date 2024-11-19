@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { rolloverBudget } from 'loot-core/client/queries';
+import { envelopeBudget } from 'loot-core/client/queries';
 
 import { styles } from '../../style';
-import { useRolloverSheetValue } from '../budget/rollover/RolloverComponents';
+import { useEnvelopeSheetValue } from '../budget/envelope/EnvelopeBudgetComponents';
 import { Button } from '../common/Button2';
 import { InitialFocus } from '../common/InitialFocus';
-import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal2';
+import { Modal, ModalCloseButton, ModalHeader } from '../common/Modal';
 import { View } from '../common/View';
 import { FieldLabel } from '../mobile/MobileForms';
 import { AmountInput } from '../util/AmountInput';
@@ -17,7 +18,8 @@ type HoldBufferModalProps = {
 };
 
 export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
-  const available = useRolloverSheetValue(rolloverBudget.toBudget) ?? 0;
+  const { t } = useTranslation(); // Initialize i18next
+  const available = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const [amount, setAmount] = useState<number>(0);
 
   const _onSubmit = (newAmount: number) => {
@@ -31,11 +33,11 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title="Hold Buffer"
-            rightContent={<ModalCloseButton onClick={close} />}
+            title={t('Hold Buffer')}
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
-            <FieldLabel title="Hold this amount:" />
+            <FieldLabel title={t('Hold this amount:')} />{' '}
             <InitialFocus>
               <AmountInput
                 value={available}
@@ -71,7 +73,7 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
               }}
               onPress={() => _onSubmit(amount)}
             >
-              Hold
+              {t('Hold')}
             </Button>
           </View>
         </>

@@ -1,6 +1,6 @@
 import React, { type ComponentPropsWithoutRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { useResponsive } from '../../ResponsiveProvider';
 import { theme } from '../../style';
 import { AccountAutocomplete } from '../autocomplete/AccountAutocomplete';
 import {
@@ -8,9 +8,10 @@ import {
   Modal,
   ModalTitle,
   ModalHeader,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { View } from '../common/View';
 import { SectionLabel } from '../forms';
+import { useResponsive } from '../responsive/ResponsiveProvider';
 
 type AccountAutocompleteModalProps = {
   autocompleteProps: ComponentPropsWithoutRef<typeof AccountAutocomplete>;
@@ -21,6 +22,7 @@ export function AccountAutocompleteModal({
   autocompleteProps,
   onClose,
 }: AccountAutocompleteModalProps) {
+  const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const defaultAutocompleteProps = {
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
@@ -44,13 +46,13 @@ export function AccountAutocompleteModal({
             <ModalHeader
               title={
                 <ModalTitle
-                  title="Account"
+                  title={t('Account')}
                   getStyle={() => ({ color: theme.menuAutoCompleteText })}
                 />
               }
               rightContent={
                 <ModalCloseButton
-                  onClick={close}
+                  onPress={close}
                   style={{ color: theme.menuAutoCompleteText }}
                 />
               }
@@ -59,7 +61,7 @@ export function AccountAutocompleteModal({
           <View>
             {!isNarrowWidth && (
               <SectionLabel
-                title="Account"
+                title={t('Account')}
                 style={{
                   alignSelf: 'center',
                   color: theme.menuAutoCompleteText,

@@ -1,11 +1,14 @@
 // @ts-strict-ignore
-import React, { type FormEvent, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { Form } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
+
+import { t } from 'i18next';
 
 import { closeModal, createAccount } from 'loot-core/client/actions';
 import { toRelaxedNumber } from 'loot-core/src/shared/util';
 
+import * as useAccounts from '../../hooks/useAccounts';
 import { useNavigate } from '../../hooks/useNavigate';
 import { theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -20,28 +23,39 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '../common/Modal2';
+} from '../common/Modal';
 import { Text } from '../common/Text';
 import { View } from '../common/View';
 import { Checkbox } from '../forms';
+import { validateAccountName } from '../util/accountValidation';
 
 export function CreateLocalAccountModal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const accounts = useAccounts.useAccounts();
   const [name, setName] = useState('');
   const [offbudget, setOffbudget] = useState(false);
   const [balance, setBalance] = useState('0');
 
-  const [nameError, setNameError] = useState(false);
+  const [nameError, setNameError] = useState(null);
   const [balanceError, setBalanceError] = useState(false);
 
   const validateBalance = balance => !isNaN(parseFloat(balance));
 
+  const validateAndSetName = (name: string) => {
+    const nameError = validateAccountName(name, '', accounts);
+    if (nameError) {
+      setNameError(nameError);
+    } else {
+      setName(name);
+      setNameError(null);
+    }
+  };
+
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const nameError = !name;
-    setNameError(nameError);
+    const nameError = validateAccountName(name, '', accounts);
 
     const balanceError = !validateBalance(balance);
     setBalanceError(balanceError);
@@ -59,8 +73,10 @@ export function CreateLocalAccountModal() {
       {({ state: { close } }) => (
         <>
           <ModalHeader
-            title={<ModalTitle title="Create Local Account" shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onClick={close} />}
+            title={
+              <ModalTitle title={t('Create Local Account')} shrinkOnOverflow />
+            }
+            rightContent={<ModalCloseButton onPress={close} />}
           />
           <View>
             <Form onSubmit={onSubmit}>
@@ -72,18 +88,15 @@ export function CreateLocalAccountModal() {
                     onChange={event => setName(event.target.value)}
                     onBlur={event => {
                       const name = event.target.value.trim();
-                      setName(name);
-                      if (name && nameError) {
-                        setNameError(false);
-                      }
+                      validateAndSetName(name);
                     }}
                     style={{ flex: 1 }}
                   />
                 </InitialFocus>
               </InlineField>
               {nameError && (
-                <FormError style={{ marginLeft: 75 }}>
-                  Name is required
+                <FormError style={{ marginLeft: 75, color: theme.warningText }}>
+                  {nameError}
                 </FormError>
               )}
 
@@ -114,7 +127,7 @@ export function CreateLocalAccountModal() {
                         verticalAlign: 'center',
                       }}
                     >
-                      Off-budget
+                      {t('Off-budget')}
                     </label>
                   </View>
                   <div
@@ -126,16 +139,16 @@ export function CreateLocalAccountModal() {
                     }}
                   >
                     <Text>
-                      This cannot be changed later. <br /> {'\n'}
-                      See{' '}
+                      {t('This cannot be changed later.')} <br /> {'\n'}
+                      {t('See')}{' '}
                       <Link
                         variant="external"
                         linkColor="muted"
                         to="https://actualbudget.org/docs/accounts/#off-budget-accounts"
                       >
-                        Accounts Overview
+                        {t('Accounts Overview')}
                       </Link>{' '}
-                      for more information.
+                      {t('for more information.')}
                     </Text>
                   </div>
                 </View>
@@ -159,18 +172,18 @@ export function CreateLocalAccountModal() {
               </InlineField>
               {balanceError && (
                 <FormError style={{ marginLeft: 75 }}>
-                  Balance must be a number
+                  {t('Balance must be a number')}
                 </FormError>
               )}
 
               <ModalButtons>
-                <Button onPress={close}>Back</Button>
+                <Button onPress={close}>{t('Back')}</Button>
                 <Button
                   type="submit"
                   variant="primary"
                   style={{ marginLeft: 10 }}
                 >
-                  Create
+                  {t('Create')}
                 </Button>
               </ModalButtons>
             </Form>

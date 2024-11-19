@@ -1,27 +1,23 @@
-import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useLocalStorage } from 'usehooks-ts';
 
-import { savePrefs } from 'loot-core/src/client/actions';
-import { type State } from 'loot-core/src/client/state-types';
 import { type LocalPrefs } from 'loot-core/src/types/prefs';
+
+import { useMetadataPref } from './useMetadataPref';
 
 type SetLocalPrefAction<K extends keyof LocalPrefs> = (
   value: LocalPrefs[K],
 ) => void;
 
+/**
+ * Local preferences are scoped to a specific budget file.
+ */
 export function useLocalPref<K extends keyof LocalPrefs>(
   prefName: K,
 ): [LocalPrefs[K], SetLocalPrefAction<K>] {
-  const dispatch = useDispatch();
-  const setLocalPref = useCallback<SetLocalPrefAction<K>>(
-    value => {
-      dispatch(savePrefs({ [prefName]: value } as LocalPrefs));
-    },
-    [prefName, dispatch],
-  );
-  const localPref = useSelector(
-    (state: State) => state.prefs.local?.[prefName] as LocalPrefs[K],
-  );
+  const [budgetId] = useMetadataPref('id');
 
-  return [localPref, setLocalPref];
+  return useLocalStorage<LocalPrefs[K]>(`${budgetId}-${prefName}`, undefined, {
+    deserializer: JSON.parse,
+    serializer: JSON.stringify,
+  });
 }

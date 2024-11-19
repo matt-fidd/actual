@@ -5,9 +5,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { ListBox, Section, Header, Collection } from 'react-aria-components';
 import { useDispatch } from 'react-redux';
 
-import { Item, Section } from '@react-stately/collections';
+import { t } from 'i18next';
 
 import { setNotificationInset } from 'loot-core/client/actions';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
@@ -28,24 +29,22 @@ import { AnimatedLoading } from '../../../icons/AnimatedLoading';
 import { SvgDelete } from '../../../icons/v0';
 import { SvgDotsHorizontalTriple } from '../../../icons/v1';
 import { styles, theme } from '../../../style';
-import { Button } from '../../common/Button';
+import { Button } from '../../common/Button2';
 import { Menu } from '../../common/Menu';
 import { Popover } from '../../common/Popover';
 import { Text } from '../../common/Text';
 import { View } from '../../common/View';
+import { useScrollListener } from '../../ScrollProvider';
 import { FloatingActionBar } from '../FloatingActionBar';
 
-import { ListBox } from './ListBox';
-import { Transaction } from './Transaction';
+import { TransactionListItem } from './TransactionListItem';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 
 export function TransactionList({
   isLoading,
   transactions,
-  isNewTransaction,
   onOpenTransaction,
-  scrollProps = {},
   onLoadMore,
 }) {
   const sections = useMemo(() => {
@@ -56,22 +55,14 @@ export function TransactionList({
         sections.length === 0 ||
         transaction.date !== sections[sections.length - 1].date
       ) {
-        // Mark the last transaction in the section so it can render
-        // with a different border
-        const lastSection = sections[sections.length - 1];
-        if (lastSection && lastSection.data.length > 0) {
-          const lastData = lastSection.data;
-          lastData[lastData.length - 1].isLast = true;
-        }
-
         sections.push({
           id: `${isPreviewId(transaction.id) ? 'preview/' : ''}${transaction.date}`,
           date: transaction.date,
-          data: [],
+          transactions: [],
         });
       }
 
-      sections[sections.length - 1].data.push(transaction);
+      sections[sections.length - 1].transactions.push(transaction);
     });
     return sections;
   }, [transactions]);
@@ -79,19 +70,28 @@ export function TransactionList({
   const dispatchSelected = useSelectedDispatch();
   const selectedTransactions = useSelectedItems();
 
-  const onTransactionPress = (transaction, isLongPress = false) => {
-    const isPreview = isPreviewId(transaction.id);
+  const onTransactionPress = useCallback(
+    (transaction, isLongPress = false) => {
+      const isPreview = isPreviewId(transaction.id);
+      if (!isPreview && (isLongPress || selectedTransactions.size > 0)) {
+        dispatchSelected({ type: 'select', id: transaction.id });
+      } else {
+        onOpenTransaction(transaction);
+      }
+    },
+    [dispatchSelected, onOpenTransaction, selectedTransactions],
+  );
 
-    if (!isPreview && (isLongPress || selectedTransactions.size > 0)) {
-      dispatchSelected({ type: 'select', id: transaction.id });
-    } else {
-      onOpenTransaction(transaction);
+  useScrollListener(({ hasScrolledToEnd }) => {
+    if (hasScrolledToEnd('down', 5)) {
+      onLoadMore?.();
     }
-  };
+  });
 
   if (isLoading) {
     return (
       <View
+        aria-label={t('Loading...')}
         style={{
           flex: 1,
           justifyContent: 'center',
@@ -102,68 +102,62 @@ export function TransactionList({
       </View>
     );
   }
-
   return (
     <>
-      {scrollProps.ListHeaderComponent}
       <ListBox
-        {...scrollProps}
-        aria-label="transaction list"
-        label=""
-        loadMore={onLoadMore}
-        selectionMode="none"
+        aria-label="Transaction list"
+        selectionMode={selectedTransactions.size > 0 ? 'multiple' : 'single'}
+        selectedKeys={selectedTransactions}
+        dependencies={[selectedTransactions]}
+        renderEmptyState={() => (
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: theme.mobilePageBackground,
+            }}
+          >
+            <Text style={{ fontSize: 15 }}>No transactions</Text>
+          </View>
+        )}
+        items={sections}
       >
-        {sections.length === 0 ? (
+        {section => (
           <Section>
-            <Item textValue="No transactions">
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  width: '100%',
-                  backgroundColor: theme.mobilePageBackground,
-                }}
-              >
-                <Text style={{ fontSize: 15 }}>No transactions</Text>
-              </div>
-            </Item>
-          </Section>
-        ) : null}
-        {sections.map(section => {
-          return (
-            <Section
-              title={
-                <span>{monthUtils.format(section.date, 'MMMM dd, yyyy')}</span>
-              }
-              key={section.id}
+            <Header
+              style={{
+                ...styles.smallText,
+                backgroundColor: theme.pageBackground,
+                color: theme.tableHeaderText,
+                display: 'flex',
+                justifyContent: 'center',
+                paddingBottom: 4,
+                paddingTop: 4,
+                position: 'sticky',
+                top: '0',
+                width: '100%',
+                zIndex: 10,
+              }}
             >
-              {section.data.map((transaction, index, transactions) => {
-                if (isPreviewId(transaction.id) && transaction.is_child) {
-                  return null;
-                }
-
-                return (
-                  <Item
-                    key={transaction.id}
-                    style={{
-                      fontSize:
-                        index === transactions.length - 1 ? 98 : 'inherit',
-                    }}
-                    textValue={transaction.id}
-                  >
-                    <Transaction
-                      transaction={transaction}
-                      isAdded={isNewTransaction(transaction.id)}
-                      isSelected={selectedTransactions.has(transaction.id)}
-                      onPress={trans => onTransactionPress(trans)}
-                      onLongPress={trans => onTransactionPress(trans, true)}
-                    />
-                  </Item>
-                );
-              })}
-            </Section>
-          );
-        })}
+              {monthUtils.format(section.date, 'MMMM dd, yyyy')}
+            </Header>
+            <Collection
+              items={section.transactions.filter(
+                t => !isPreviewId(t.id) || !t.is_child,
+              )}
+              addIdAndValue
+            >
+              {transaction => (
+                <TransactionListItem
+                  key={transaction.id}
+                  value={transaction}
+                  onPress={trans => onTransactionPress(trans)}
+                  onLongPress={trans => onTransactionPress(trans, true)}
+                />
+              )}
+            </Collection>
+          </Section>
+        )}
       </ListBox>
       {selectedTransactions.size > 0 && (
         <SelectedTransactionsFloatingActionBar transactions={transactions} />
@@ -260,10 +254,10 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
           }}
         >
           <Button
-            type="bare"
+            variant="bare"
             {...buttonProps}
             style={{ ...buttonProps.style, marginRight: 4 }}
-            onClick={() => {
+            onPress={() => {
               if (selectedTransactions.size > 0) {
                 dispatchSelected({ type: 'select-none' });
               }
@@ -285,10 +279,10 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
           }}
         >
           <Button
-            type="bare"
+            variant="bare"
             ref={editMenuTriggerRef}
             aria-label="Edit fields"
-            onClick={() => {
+            onPress={() => {
               setIsEditMenuOpen(true);
             }}
             {...buttonProps}
@@ -394,10 +388,10 @@ function SelectedTransactionsFloatingActionBar({ transactions, style }) {
           </Popover>
 
           <Button
-            type="bare"
+            variant="bare"
             ref={moreOptionsMenuTriggerRef}
             aria-label="More options"
-            onClick={() => {
+            onPress={() => {
               setIsMoreOptionsMenuOpen(true);
             }}
             {...buttonProps}

@@ -24,7 +24,7 @@ export function FiltersStack({
   onConditionsOpChange,
 }: {
   conditions: RuleConditionEntity[];
-  conditionsOp: string;
+  conditionsOp: 'and' | 'or';
   onUpdateFilter: (
     filter: RuleConditionEntity,
     newFilter: RuleConditionEntity,
@@ -32,7 +32,7 @@ export function FiltersStack({
   onDeleteFilter: (filter: RuleConditionEntity) => void;
   onClearFilters: () => void;
   onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
-  filterId: SavedFilter;
+  filterId?: SavedFilter;
   savedFilters: TransactionFilterEntity[];
   onConditionsOpChange: (value: 'and' | 'or') => void;
 }) {

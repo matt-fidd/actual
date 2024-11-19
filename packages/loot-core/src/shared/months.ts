@@ -100,6 +100,14 @@ export function weekFromDate(
   );
 }
 
+export function firstDayOfMonth(date: DateLike): string {
+  return dayFromDate(d.startOfMonth(_parse(date)));
+}
+
+export function lastDayOfMonth(date: DateLike): string {
+  return dayFromDate(d.endOfMonth(_parse(date)));
+}
+
 export function dayFromDate(date: DateLike): string {
   return d.format(_parse(date), 'yyyy-MM-dd');
 }
@@ -389,8 +397,8 @@ export function nameForMonth(month: DateLike): string {
   return d.format(_parse(month), 'MMMM ‘yy');
 }
 
-export function format(month: DateLike, str: string): string {
-  return d.format(_parse(month), str);
+export function format(month: DateLike, format: string): string {
+  return d.format(_parse(month), format);
 }
 
 export const getDateFormatRegex = memoizeOne((format: string) => {

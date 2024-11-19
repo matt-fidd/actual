@@ -11,6 +11,7 @@ export const LOAD_TAGS = 'LOAD_TAGS';
 export const SET_PREFS = 'SET_PREFS';
 export const MERGE_LOCAL_PREFS = 'MERGE_LOCAL_PREFS';
 export const MERGE_GLOBAL_PREFS = 'MERGE_GLOBAL_PREFS';
+export const MERGE_SYNCED_PREFS = 'MERGE_SYNCED_PREFS';
 export const SET_BUDGETS = 'SET_BUDGETS';
 export const SET_REMOTE_FILES = 'SET_REMOTE_FILES';
 export const SET_ALL_FILES = 'SET_ALL_FILES';

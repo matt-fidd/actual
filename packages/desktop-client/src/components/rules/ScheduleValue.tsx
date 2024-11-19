@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
+import { useSchedules } from 'loot-core/client/data-hooks/schedules';
+import { q } from 'loot-core/shared/query';
 import { getPayeesById } from 'loot-core/src/client/reducers/queries';
 import { describeSchedule } from 'loot-core/src/shared/schedules';
 import { type ScheduleEntity } from 'loot-core/src/types/models';
 
 import { usePayees } from '../../hooks/usePayees';
+import { AnimatedLoading } from '../../icons/AnimatedLoading';
+import { View } from '../common/View';
 
-import { SchedulesQuery } from './SchedulesQuery';
 import { Value } from './Value';
 
 type ScheduleValueProps = {
@@ -16,7 +19,16 @@ type ScheduleValueProps = {
 export function ScheduleValue({ value }: ScheduleValueProps) {
   const payees = usePayees();
   const byId = getPayeesById(payees);
-  const { data: schedules } = SchedulesQuery.useQuery();
+  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
+  const { schedules = [], isLoading } = useSchedules({ query: schedulesQuery });
+
+  if (isLoading) {
+    return (
+      <View aria-label="Loading..." style={{ display: 'inline-flex' }}>
+        <AnimatedLoading width={10} height={10} />
+      </View>
+    );
+  }
 
   return (
     <Value

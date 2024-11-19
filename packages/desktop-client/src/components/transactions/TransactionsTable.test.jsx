@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
+import { SchedulesProvider } from 'loot-core/src/client/data-hooks/schedules';
 import { SpreadsheetProvider } from 'loot-core/src/client/SpreadsheetProvider';
 import {
   generateTransaction,
@@ -23,7 +24,7 @@ import { integerToCurrency } from 'loot-core/src/shared/util';
 
 import { SelectedProviderWithItems } from '../../hooks/useSelected';
 import { SplitsExpandedProvider } from '../../hooks/useSplitsExpanded';
-import { ResponsiveProvider } from '../../ResponsiveProvider';
+import { ResponsiveProvider } from '../responsive/ResponsiveProvider';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -31,11 +32,36 @@ vi.mock('loot-core/src/platform/client/fetch');
 vi.mock('../../hooks/useFeatureFlag', () => ({
   default: vi.fn().mockReturnValue(false),
 }));
+vi.mock('../../hooks/useSyncedPref', () => ({
+  useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
+}));
+vi.mock('../../hooks/useFeatureFlag', () => ({
+  useFeatureFlag: () => false,
+}));
 
 const accounts = [generateAccount('Bank of America')];
 const payees = [
-  { id: 'payed-to', favorite: true, name: 'Payed To' },
-  { id: 'guy', favorite: false, name: 'This guy on the side of the road' },
+  {
+    id: 'bob-id',
+    name: 'Bob',
+    favorite: 1,
+    transfer_acct: null,
+    category: null,
+  },
+  {
+    id: 'alice-id',
+    name: 'Alice',
+    favorite: 1,
+    transfer_acct: null,
+    category: null,
+  },
+  {
+    id: 'guy',
+    favorite: 0,
+    transfer_acct: null,
+    category: null,
+    name: 'This guy on the side of the road',
+  },
 ];
 const categoryGroups = generateCategoryGroups([
   {
@@ -64,6 +90,7 @@ function generateTransactions(count, splitAtIndexes = [], showError = false) {
       generateTransaction(
         {
           account: accounts[0].id,
+          payee: 'alice-id',
           category:
             i === 0
               ? null
@@ -122,27 +149,29 @@ function LiveTransactionTable(props) {
     <TestProvider>
       <ResponsiveProvider>
         <SpreadsheetProvider>
-          <SelectedProviderWithItems
-            name="transactions"
-            items={transactions}
-            fetchAllIds={() => transactions.map(t => t.id)}
-          >
-            <SplitsExpandedProvider>
-              <TransactionTable
-                {...props}
-                transactions={transactions}
-                loadMoreTransactions={() => {}}
-                commonPayees={[]}
-                payees={payees}
-                addNotification={n => console.log(n)}
-                onSave={onSave}
-                onSplit={onSplit}
-                onAdd={onAdd}
-                onAddSplit={onAddSplit}
-                onCreatePayee={onCreatePayee}
-              />
-            </SplitsExpandedProvider>
-          </SelectedProviderWithItems>
+          <SchedulesProvider>
+            <SelectedProviderWithItems
+              name="transactions"
+              items={transactions}
+              fetchAllIds={() => transactions.map(t => t.id)}
+            >
+              <SplitsExpandedProvider>
+                <TransactionTable
+                  {...props}
+                  transactions={transactions}
+                  loadMoreTransactions={() => {}}
+                  commonPayees={[]}
+                  payees={payees}
+                  addNotification={n => console.log(n)}
+                  onSave={onSave}
+                  onSplit={onSplit}
+                  onAdd={onAdd}
+                  onAddSplit={onAddSplit}
+                  onCreatePayee={onCreatePayee}
+                />
+              </SplitsExpandedProvider>
+            </SelectedProviderWithItems>
+          </SchedulesProvider>
         </SpreadsheetProvider>
       </ResponsiveProvider>
     </TestProvider>
@@ -280,6 +309,41 @@ function editField(container, name, rowIndex) {
   const field = queryField(container, name, '', rowIndex);
   return _editField(field, container);
 }
+
+expect.extend({
+  payeesToHaveFavoriteStars(container, validPayeeListWithFavorite) {
+    const incorrectStarList = [];
+    const foundStarList = [];
+    validPayeeListWithFavorite.forEach(payeeItem => {
+      const shouldHaveFavorite = payeeItem != null;
+      let found = false;
+      if (container[0].querySelectorAll('svg').length === 1) {
+        found = true;
+        foundStarList.push(payeeItem);
+      }
+      if (shouldHaveFavorite !== found) {
+        incorrectStarList.push(payeeItem);
+      }
+    });
+    if (
+      foundStarList.length !== validPayeeListWithFavorite.length ||
+      incorrectStarList.length > 0
+    ) {
+      return {
+        message: () =>
+          `Expected ${validPayeeListWithFavorite.join(', ')} to have favorite stars.` +
+          `Received ${foundStarList.length} items with favorite stars. Incorrect: ${incorrectStarList.join(', ')}`,
+        pass: false,
+      };
+    } else {
+      return {
+        message: () =>
+          `Expected ${validPayeeListWithFavorite} to have favorite stars`,
+        pass: true,
+      };
+    }
+  },
+});
 
 function expectToBeEditingField(container, name, rowIndex, isNew) {
   let field;
@@ -587,6 +651,54 @@ describe('Transactions', () => {
     );
   });
 
+  test('dropdown payee displays on new transaction with account list column', async () => {
+    const { container, updateProps, queryByTestId } = renderTransactions({
+      currentAccountId: null,
+    });
+    updateProps({ isAdding: true });
+    expect(queryByTestId('new-transaction')).toBeTruthy();
+
+    await editNewField(container, 'payee');
+
+    const renderedPayees = screen
+      .getByTestId('autocomplete')
+      .querySelectorAll('[data-testid$="payee-item"]');
+
+    expect(
+      Array.from(renderedPayees.values()).map(p =>
+        p.getAttribute('data-testid'),
+      ),
+    ).toStrictEqual([
+      'Alice-payee-item',
+      'Bob-payee-item',
+      'This guy on the side of the road-payee-item',
+    ]);
+    expect(renderedPayees).payeesToHaveFavoriteStars([
+      'Alice-payee-item',
+      'Bob-payee-item',
+    ]);
+  });
+
+  test('dropdown payee displays on existing non-transfer transaction', async () => {
+    const { container } = renderTransactions();
+
+    await editField(container, 'payee', 2);
+
+    const renderedPayees = screen
+      .getByTestId('autocomplete')
+      .querySelectorAll('[data-testid$="payee-item"]');
+
+    expect(
+      Array.from(renderedPayees.values()).map(p =>
+        p.getAttribute('data-testid'),
+      ),
+    ).toStrictEqual([
+      'Alice-payee-item',
+      'Bob-payee-item',
+      'This guy on the side of the road-payee-item',
+    ]);
+  });
+
   // TODO: fix this test
   test.skip('dropdown invalid value resets correctly', async () => {
     const { container, getTransactions } = renderTransactions();
@@ -863,7 +975,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_parent: true,
         notes: 'Notes',
-        payee: 'payed-to',
+        payee: 'alice-id',
         sort_order: 0,
       },
       {
@@ -876,7 +988,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_child: true,
         parent_id: parentId,
-        payee: 'payed-to',
+        payee: 'alice-id',
         sort_order: -1,
         starting_balance_flag: null,
       },
@@ -890,7 +1002,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_child: true,
         parent_id: parentId,
-        payee: 'payed-to',
+        payee: 'alice-id',
         sort_order: -2,
         starting_balance_flag: null,
       },

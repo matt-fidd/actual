@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import './polyfills';
+
 import * as injectAPI from '@actual-app/api/injected';
 import * as CRDT from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
@@ -50,11 +51,12 @@ import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
 import * as Platform from './platform';
 import { get, post } from './post';
+import { app as preferencesApp } from './preferences/app';
 import * as prefs from './prefs';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
-import { getServer, setServer } from './server-config';
+import { getServer, isValidBaseURL, setServer } from './server-config';
 import * as sheet from './sheet';
 import { resolveName, unresolveName } from './spreadsheet/util';
 import {
@@ -172,7 +174,7 @@ handlers['get-budget-bounds'] = async function () {
   return budget.createAllBudgets();
 };
 
-handlers['rollover-budget-month'] = async function ({ month }) {
+handlers['envelope-budget-month'] = async function ({ month }) {
   const groups = await db.getCategoriesGrouped();
   const sheetName = monthUtils.sheetForMonth(month);
 
@@ -214,6 +216,8 @@ handlers['rollover-budget-month'] = async function ({ month }) {
           value(`sum-amount-${cat.id}`),
           value(`leftover-${cat.id}`),
           value(`carryover-${cat.id}`),
+          value(`goal-${cat.id}`),
+          value(`long-goal-${cat.id}`),
         ]);
       }
     }
@@ -222,7 +226,7 @@ handlers['rollover-budget-month'] = async function ({ month }) {
   return values;
 };
 
-handlers['report-budget-month'] = async function ({ month }) {
+handlers['tracking-budget-month'] = async function ({ month }) {
   const groups = await db.getCategoriesGrouped();
   const sheetName = monthUtils.sheetForMonth(month);
 
@@ -253,6 +257,8 @@ handlers['report-budget-month'] = async function ({ month }) {
         value(`budget-${cat.id}`),
         value(`sum-amount-${cat.id}`),
         value(`leftover-${cat.id}`),
+        value(`goal-${cat.id}`),
+        value(`long-goal-${cat.id}`),
       ]);
 
       if (!group.is_income) {
@@ -262,20 +268,6 @@ handlers['report-budget-month'] = async function ({ month }) {
   }
 
   return values;
-};
-
-handlers['budget-set-type'] = async function ({ type }) {
-  if (!prefs.BUDGET_TYPES.includes(type)) {
-    throw new Error('Invalid budget type: ' + type);
-  }
-
-  // It's already the same; don't do anything
-  if (type === prefs.getPrefs().budgetType) {
-    return;
-  }
-
-  // Save prefs
-  return prefs.savePrefs({ budgetType: type });
 };
 
 handlers['category-create'] = mutator(async function ({
@@ -290,7 +282,7 @@ handlers['category-create'] = mutator(async function ({
     }
 
     return db.insertCategory({
-      name,
+      name: name.trim(),
       cat_group: groupId,
       is_income: isIncome ? 1 : 0,
       hidden: hidden ? 1 : 0,
@@ -301,7 +293,10 @@ handlers['category-create'] = mutator(async function ({
 handlers['category-update'] = mutator(async function (category) {
   return withUndo(async () => {
     try {
-      await db.updateCategory(category);
+      await db.updateCategory({
+        ...category,
+        name: category.name.trim(),
+      });
     } catch (e) {
       if (e.message.toLowerCase().includes('unique constraint')) {
         return { error: { type: 'category-exists' } };
@@ -1067,24 +1062,74 @@ handlers['gocardless-create-web-token'] = async function ({
   }
 };
 
-handlers['accounts-bank-sync'] = async function ({ id }) {
+function handleSyncResponse(
+  res,
+  acct,
+  newTransactions,
+  matchedTransactions,
+  updatedAccounts,
+) {
+  const { added, updated } = res;
+
+  newTransactions.push(...added);
+  matchedTransactions.push(...updated);
+
+  if (added.length > 0 || updated.length > 0) {
+    updatedAccounts.push(acct.id);
+  }
+}
+
+function handleSyncError(err, acct) {
+  if (err.type === 'BankSyncError') {
+    return {
+      type: 'SyncError',
+      accountId: acct.id,
+      message: 'Failed syncing account “' + acct.name + '.”',
+      category: err.category,
+      code: err.code,
+    };
+  }
+
+  if (err instanceof PostError && err.reason !== 'internal') {
+    return {
+      accountId: acct.id,
+      message: err.reason
+        ? err.reason
+        : `Account “${acct.name}” is not linked properly. Please link it again.`,
+    };
+  }
+
+  return {
+    accountId: acct.id,
+    message:
+      'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
+    internal: err.stack,
+  };
+}
+
+handlers['accounts-bank-sync'] = async function ({ ids = [] }) {
   const [[, userId], [, userKey]] = await asyncStorage.multiGet([
     'user-id',
     'user-key',
   ]);
+
   const accounts = await db.runQuery(
-    `SELECT a.*, b.bank_id as bankId FROM accounts a
-         LEFT JOIN banks b ON a.bank = b.id
-         WHERE a.tombstone = 0 AND a.closed = 0 ${id ? 'AND a.id = ?' : ''}
-         ORDER BY a.offbudget, a.sort_order`,
-    id ? [id] : [],
+    `
+    SELECT a.*, b.bank_id as bankId 
+    FROM accounts a
+    LEFT JOIN banks b ON a.bank = b.id
+    WHERE a.tombstone = 0 AND a.closed = 0
+      ${ids.length ? `AND a.id IN (${ids.map(() => '?').join(', ')})` : ''}
+    ORDER BY a.offbudget, a.sort_order
+  `,
+    ids,
     true,
   );
 
   const errors = [];
-  let newTransactions = [];
-  let matchedTransactions = [];
-  let updatedAccounts = [];
+  const newTransactions = [];
+  const matchedTransactions = [];
+  const updatedAccounts = [];
 
   for (let i = 0; i < accounts.length; i++) {
     const acct = accounts[i];
@@ -1099,39 +1144,15 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
           acct.bankId,
         );
 
-        const { added, updated } = res;
-
-        newTransactions = newTransactions.concat(added);
-        matchedTransactions = matchedTransactions.concat(updated);
-
-        if (added.length > 0 || updated.length > 0) {
-          updatedAccounts = updatedAccounts.concat(acct.id);
-        }
+        handleSyncResponse(
+          res,
+          acct,
+          newTransactions,
+          matchedTransactions,
+          updatedAccounts,
+        );
       } catch (err) {
-        if (err.type === 'BankSyncError') {
-          errors.push({
-            type: 'SyncError',
-            accountId: acct.id,
-            message: 'Failed syncing account “' + acct.name + '.”',
-            category: err.category,
-            code: err.code,
-          });
-        } else if (err instanceof PostError && err.reason !== 'internal') {
-          errors.push({
-            accountId: acct.id,
-            message: err.reason
-              ? err.reason
-              : `Account “${acct.name}” is not linked properly. Please link it again.`,
-          });
-        } else {
-          errors.push({
-            accountId: acct.id,
-            message:
-              'There was an internal error. Please get in touch https://actualbudget.org/contact for support.',
-            internal: err.stack,
-          });
-        }
-
+        errors.push(handleSyncError(err, acct));
         err.message = 'Failed syncing account “' + acct.name + '.”';
         captureException(err);
       } finally {
@@ -1148,6 +1169,74 @@ handlers['accounts-bank-sync'] = async function ({ id }) {
   }
 
   return { errors, newTransactions, matchedTransactions, updatedAccounts };
+};
+
+handlers['simplefin-batch-sync'] = async function ({ ids = [] }) {
+  const accounts = await db.runQuery(
+    `SELECT a.*, b.bank_id as bankId FROM accounts a
+         LEFT JOIN banks b ON a.bank = b.id
+         WHERE
+          a.tombstone = 0
+          AND a.closed = 0
+          AND a.account_sync_source = 'simpleFin'
+          ${ids.length ? `AND a.id IN (${ids.map(() => '?').join(', ')})` : ''}
+         ORDER BY a.offbudget, a.sort_order`,
+    ids.length ? ids : [],
+    true,
+  );
+
+  console.group('Bank Sync operation for all SimpleFin accounts');
+  const res = await bankSync.SimpleFinBatchSync(
+    accounts.map(a => ({
+      id: a.id,
+      accountId: a.account_id,
+    })),
+  );
+
+  const retVal = [];
+  for (const account of res) {
+    const errors = [];
+    const newTransactions = [];
+    const matchedTransactions = [];
+    const updatedAccounts = [];
+
+    if (account.res.error_code) {
+      errors.push(
+        handleSyncError(
+          {
+            type: 'BankSyncError',
+            category: account.res.error_type,
+            code: account.res.error_code,
+          },
+          accounts.find(a => a.id === account.accountId),
+        ),
+      );
+    } else {
+      handleSyncResponse(
+        account.res,
+        accounts.find(a => a.id === account.accountId),
+        newTransactions,
+        matchedTransactions,
+        updatedAccounts,
+      );
+    }
+
+    retVal.push({
+      accountId: account.accountId,
+      res: { errors, newTransactions, matchedTransactions, updatedAccounts },
+    });
+  }
+
+  if (retVal.some(a => a.res.updatedAccounts.length > 0)) {
+    connection.send('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+  }
+
+  console.groupEnd();
+
+  return retVal;
 };
 
 handlers['transactions-import'] = mutator(function ({
@@ -1261,6 +1350,18 @@ handlers['save-global-prefs'] = async function (prefs) {
   if ('theme' in prefs) {
     await asyncStorage.setItem('theme', prefs.theme);
   }
+  if ('preferredDarkTheme' in prefs) {
+    await asyncStorage.setItem(
+      'preferred-dark-theme',
+      prefs.preferredDarkTheme,
+    );
+  }
+  if ('serverSelfSignedCert' in prefs) {
+    await asyncStorage.setItem(
+      'server-self-signed-cert',
+      prefs.serverSelfSignedCert,
+    );
+  }
   return 'ok';
 };
 
@@ -1271,12 +1372,16 @@ handlers['load-global-prefs'] = async function () {
     [, documentDir],
     [, encryptKey],
     [, theme],
+    [, preferredDarkTheme],
+    [, serverSelfSignedCert],
   ] = await asyncStorage.multiGet([
     'floating-sidebar',
     'max-months',
     'document-dir',
     'encrypt-key',
     'theme',
+    'preferred-dark-theme',
+    'server-self-signed-cert',
   ]);
   return {
     floatingSidebar: floatingSidebar === 'true' ? true : false,
@@ -1291,6 +1396,11 @@ handlers['load-global-prefs'] = async function () {
       theme === 'midnight'
         ? theme
         : 'auto',
+    preferredDarkTheme:
+      preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
+        ? preferredDarkTheme
+        : 'dark',
+    serverSelfSignedCert: serverSelfSignedCert || undefined,
   };
 };
 
@@ -1420,6 +1530,10 @@ handlers['get-did-bootstrap'] = async function () {
 handlers['subscribe-needs-bootstrap'] = async function ({
   url,
 }: { url? } = {}) {
+  if (url && !isValidBaseURL(url)) {
+    return { error: 'get-server-failure' };
+  }
+
   try {
     if (!getServer(url)) {
       return { bootstrapped: true, hasServer: false };
@@ -1706,7 +1820,7 @@ handlers['download-budget'] = async function ({ fileId }) {
   const id = result.id;
   await handlers['load-budget']({ id });
   result = await handlers['sync-budget']();
-  await handlers['close-budget']();
+
   if (result.error) {
     return result;
   }
@@ -1977,7 +2091,11 @@ async function loadBudget(id) {
   }
 
   // This is a bit leaky, but we need to set the initial budget type
-  sheet.get().meta().budgetType = prefs.getPrefs().budgetType;
+  const { value: budgetType = 'rollover' } =
+    (await db.first('SELECT value from preferences WHERE id = ?', [
+      'budgetType',
+    ])) ?? {};
+  sheet.get().meta().budgetType = budgetType;
   await budget.createAllBudgets();
 
   // Load all the in-memory state
@@ -2066,6 +2184,7 @@ app.combine(
   budgetApp,
   dashboardApp,
   notesApp,
+  preferencesApp,
   toolsApp,
   filtersApp,
   reportsApp,

@@ -4,7 +4,12 @@ export class MobileAccountsPage {
   constructor(page) {
     this.page = page;
 
+    this.accountList = this.page.getByLabel('Account list');
     this.accounts = this.page.getByTestId('account');
+  }
+
+  async waitFor() {
+    await this.accountList.waitFor();
   }
 
   /**
@@ -23,7 +28,7 @@ export class MobileAccountsPage {
    * Click on the n-th account to open it up
    */
   async openNthAccount(idx) {
-    await this.accounts.nth(idx).getByRole('button').click();
+    await this.accounts.nth(idx).click();
 
     return new MobileAccountPage(this.page);
   }

@@ -1,12 +1,19 @@
 import {
+<<<<<<< HEAD
   type ElementType,
   useState,
   type ComponentProps,
   type ReactNode,
   type FocusEvent,
+=======
+  useState,
+  type ComponentProps,
+  type ReactNode,
+  type CSSProperties,
+>>>>>>> master
 } from 'react';
 
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 
 import { Input, defaultInputStyle } from './Input';
 import { InputWithTags } from './InputWithTags';

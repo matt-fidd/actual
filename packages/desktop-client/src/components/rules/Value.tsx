@@ -1,7 +1,8 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useState, type CSSProperties } from 'react';
 
 import { format as formatDate, parseISO } from 'date-fns';
+import { t } from 'i18next';
 
 import { getMonthYearFormat } from 'loot-core/src/shared/months';
 import { getRecurringDescription } from 'loot-core/src/shared/schedules';
@@ -11,7 +12,7 @@ import { useAccounts } from '../../hooks/useAccounts';
 import { useCategories } from '../../hooks/useCategories';
 import { useDateFormat } from '../../hooks/useDateFormat';
 import { usePayees } from '../../hooks/usePayees';
-import { type CSSProperties, theme } from '../../style';
+import { theme } from '../../style';
 import { Link } from '../common/Link';
 import { Text } from '../common/Text';
 
@@ -88,6 +89,7 @@ export function Value<T>({
           return value ? formatDate(parseISO(value), 'yyyy') : null;
         case 'notes':
         case 'imported_payee':
+        case 'payee_name':
           return value;
         case 'payee':
         case 'category':
@@ -181,6 +183,7 @@ export function Value<T>({
     const { num1, num2 } = value;
     return (
       <Text>
+<<<<<<< HEAD
         <Text textWithTags={textWithTags} style={valueStyle}>
           {formatValue(num1)}
         </Text>{' '}
@@ -188,6 +191,10 @@ export function Value<T>({
         <Text textWithTags={textWithTags} style={valueStyle}>
           {formatValue(num2)}
         </Text>
+=======
+        <Text style={valueStyle}>{formatValue(num1)}</Text> {t('and')}{' '}
+        <Text style={valueStyle}>{formatValue(num2)}</Text>
+>>>>>>> master
       </Text>
     );
   } else {

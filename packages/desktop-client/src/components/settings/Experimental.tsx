@@ -1,5 +1,5 @@
 import { type ReactNode, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import type { FeatureFlag } from 'loot-core/src/types/prefs';
 
@@ -36,7 +36,7 @@ function FeatureToggle({
       <Checkbox
         checked={enabled}
         onChange={() => {
-          setFlagPref(!enabled);
+          setFlagPref(String(!enabled));
         }}
         disabled={disableToggle}
       />
@@ -67,23 +67,6 @@ function FeatureToggle({
   );
 }
 
-function ReportBudgetFeature() {
-  const { t } = useTranslation();
-  const [budgetType = 'rollover'] = useSyncedPref('budgetType');
-  const enabled = useFeatureFlag('reportBudget');
-  const blockToggleOff = budgetType === 'report' && enabled;
-  return (
-    <FeatureToggle
-      flag="reportBudget"
-      disableToggle={blockToggleOff}
-      error={t('Switch to a rollover budget before turning off this feature')}
-      feedbackLink="https://github.com/actualbudget/actual/issues/2999"
-    >
-      <Trans>Budget mode toggle</Trans>
-    </FeatureToggle>
-  );
-}
-
 export function ExperimentalFeatures() {
   const [expanded, setExpanded] = useState(false);
 
@@ -92,29 +75,32 @@ export function ExperimentalFeatures() {
       primaryAction={
         expanded ? (
           <View style={{ gap: '1em' }}>
-            <FeatureToggle
-              flag="spendingReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2820"
-            >
-              <Trans>Monthly spending report</Trans>
-            </FeatureToggle>
-
-            <ReportBudgetFeature />
-
             <FeatureToggle flag="goalTemplatesEnabled">
               <Trans>Goal templates</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="simpleFinSync"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2272"
-            >
-              <Trans>SimpleFIN sync</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="dashboards"
               feedbackLink="https://github.com/actualbudget/actual/issues/3282"
             >
               <Trans>Customizable reports page (dashboards)</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="actionTemplating"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3606"
+            >
+              <Trans>Rule action templating</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="upcomingLengthAdjustment"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3660"
+            >
+              <Trans>Scheduled transaction upcoming length adjustment</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="contextMenus"
+              feedbackLink="https://github.com/actualbudget/actual/issues/3706"
+            >
+              <Trans>Context menus</Trans>
             </FeatureToggle>
           </View>
         ) : (

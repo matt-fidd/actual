@@ -1,8 +1,8 @@
 import { type ScheduleEntity } from './schedule';
 
 export interface NewRuleEntity {
-  stage: string;
-  conditionsOp: 'any' | 'and';
+  stage: 'pre' | null | 'post';
+  conditionsOp: 'or' | 'and';
   conditions: RuleConditionEntity[];
   actions: RuleActionEntity[];
   tombstone?: boolean;
@@ -35,8 +35,11 @@ type FieldValueTypes = {
   date: string;
   notes: string;
   payee: string;
+  payee_name: string;
   imported_payee: string;
   saved: string;
+  cleared: boolean;
+  reconciled: boolean;
 };
 
 type BaseConditionEntity<
@@ -55,8 +58,9 @@ type BaseConditionEntity<
     year?: boolean;
   };
   conditionsOp?: string;
-  type?: 'id' | 'boolean' | 'date' | 'number';
+  type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
   customName?: string;
+  queryFilter?: Record<string, { $oneof: string[] }>;
 };
 
 export type RuleConditionEntity =
@@ -135,6 +139,7 @@ export interface SetRuleActionEntity {
   op: 'set';
   value: unknown;
   options?: {
+    template?: string;
     splitIndex?: number;
   };
   type?: string;

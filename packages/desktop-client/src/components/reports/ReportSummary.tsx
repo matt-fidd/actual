@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import * as monthUtils from 'loot-core/src/shared/months';
 import {
@@ -35,6 +36,7 @@ export function ReportSummary({
   interval,
   intervalsCount,
 }: ReportSummaryProps) {
+  const { t } = useTranslation();
   const net =
     balanceTypeOp === 'netAssets'
       ? 'DEPOSIT'
@@ -117,11 +119,9 @@ export function ReportSummary({
             fontWeight: 800,
           }}
         >
-          <PrivacyFilter blurIntensity={7}>
-            {amountToCurrency(data[balanceTypeOp])}
-          </PrivacyFilter>
+          <PrivacyFilter>{amountToCurrency(data[balanceTypeOp])}</PrivacyFilter>
         </Text>
-        <Text style={{ fontWeight: 600 }}>For this time period</Text>
+        <Text style={{ fontWeight: 600 }}>{t('For this time period')}</Text>
       </View>
       <View
         style={{
@@ -154,7 +154,7 @@ export function ReportSummary({
             fontWeight: 800,
           }}
         >
-          <PrivacyFilter blurIntensity={7}>
+          <PrivacyFilter>
             {!isNaN(average) && integerToCurrency(Math.round(average))}
           </PrivacyFilter>
         </Text>
