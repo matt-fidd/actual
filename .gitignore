@@ -1,3 +1,5 @@
+.*.swp
+
 # Sample Data
 /data/*
 !data/.gitkeep
