@@ -10971,6 +10971,7 @@ __metadata:
     lage: "npm:^2.15.5"
     minimatch: "npm:^10.2.5"
     nano-staged: "npm:^0.8.0"
+    npm-check-updates: "npm:^21.0.0"
     npm-run-all: "npm:^4.1.5"
     oxfmt: "npm:^0.44.0"
     oxlint: "npm:^1.59.0"
@@ -21619,6 +21620,16 @@ __metadata:
   dependencies:
     once: "npm:^1.4.0"
   checksum: 10/5300d42932bac5d4f8d19bf90ebb53c3474ba615eab912770d1b8de896baea6dc7ef3b95158aaf601acfb0cd6b573bceb5fe30cf0224cb06ea227ef3e8fc7f3d
+  languageName: node
+  linkType: hard
+
+"npm-check-updates@npm:^21.0.0":
+  version: 21.0.3
+  resolution: "npm-check-updates@npm:21.0.3"
+  bin:
+    ncu: build/cli.js
+    npm-check-updates: build/cli.js
+  checksum: 10/f3f0860604f2700a22c8504ae6dcd576b7bcdcb95aa607d42f678a18d97ba51d0f77b5c733d72b05450ce5366b5754c4d9188c09a1a535df015384bbafef24e3
   languageName: node
   linkType: hard
 
