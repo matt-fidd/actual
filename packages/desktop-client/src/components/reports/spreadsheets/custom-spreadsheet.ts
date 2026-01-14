@@ -52,6 +52,7 @@ export type createCustomSpreadsheetProps = {
   showHiddenCategories: boolean;
   showUncategorized: boolean;
   trimIntervals: boolean;
+  useAbsoluteDates?: boolean;
   groupBy?: string;
   balanceTypeOp?: balanceTypeOpType;
   sortByOp?: sortByOpType;
@@ -74,6 +75,7 @@ export function createCustomSpreadsheet({
   showHiddenCategories,
   showUncategorized,
   trimIntervals,
+  useAbsoluteDates,
   groupBy = '',
   balanceTypeOp = 'totalDebts',
   sortByOp = 'desc',
@@ -114,6 +116,7 @@ export function createCustomSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          useAbsoluteDates,
         ),
       ).then(({ data }) => data),
       aqlQuery(
@@ -124,6 +127,7 @@ export function createCustomSpreadsheet({
           interval,
           conditionsOpKey,
           filters,
+          useAbsoluteDates,
         ),
       ).then(({ data }) => data),
     ]);
