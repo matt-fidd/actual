@@ -3679,9 +3679,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/rebuild@npm:4.0.2":
-  version: 4.0.2
-  resolution: "@electron/rebuild@npm:4.0.2"
+"@electron/rebuild@npm:4.0.3":
+  version: 4.0.3
+  resolution: "@electron/rebuild@npm:4.0.3"
   dependencies:
     "@malept/cross-spawn-promise": "npm:^2.0.0"
     debug: "npm:^4.1.1"
@@ -3694,14 +3694,14 @@ __metadata:
     ora: "npm:^5.1.0"
     read-binary-file-arch: "npm:^1.0.6"
     semver: "npm:^7.3.5"
-    tar: "npm:^6.0.5"
+    tar: "npm:^7.5.6"
     yargs: "npm:^17.0.1"
   dependenciesMeta:
     electron:
       built: true
   bin:
     electron-rebuild: lib/cli.js
-  checksum: 10/41e1d7f6d68292f0a97425fc0d2b12fe0beb6b2f2ed47ceb3741bc90ce3704eca373cde95613c0aaca2c39dd97c9cc2d2afb8f6541c18266627165b2ecc202d7
+  checksum: 10/24626c53eebd0d8bb47b1ea628e0c3c97096c2f0a8fbdbac774f29350d855aca53abcfd9bd6e1bf7655b2b6739a09ddb281f25089a5287a08725e30f8fba1331
   languageName: node
   linkType: hard
 
@@ -14402,7 +14402,7 @@ __metadata:
   dependencies:
     "@actual-app/sync-server": "workspace:*"
     "@electron/notarize": "npm:3.1.1"
-    "@electron/rebuild": "npm:4.0.2"
+    "@electron/rebuild": "npm:4.0.3"
     "@playwright/test": "npm:1.58.2"
     "@types/copyfiles": "npm:^2"
     "@types/fs-extra": "npm:^11"
@@ -27058,6 +27058,19 @@ __metadata:
     minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
   checksum: 10/4848cd2fa2fcaf0734cf54e14bc685056eb43a74d7cc7f954c3ac88fea88c85d95b1d7896619f91aab6f2234c5eec731c18aaa201a78fcf86985bdc824ed7a00
+  languageName: node
+  linkType: hard
+
+"tar@npm:^7.5.6":
+  version: 7.5.9
+  resolution: "tar@npm:7.5.9"
+  dependencies:
+    "@isaacs/fs-minipass": "npm:^4.0.0"
+    chownr: "npm:^3.0.0"
+    minipass: "npm:^7.1.2"
+    minizlib: "npm:^3.1.0"
+    yallist: "npm:^5.0.0"
+  checksum: 10/1213cdde9c22d6acf8809ba5d2a025212ce3517bc99c4a4c6981b7dc0489bf3b164db9c826c9517680889194c9ba57448c8ff0da35eca9a60bb7689bf0b3897d
   languageName: node
   linkType: hard
 
