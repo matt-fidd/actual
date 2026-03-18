@@ -18,6 +18,7 @@
     ]
   },
   "scripts": {
+    "postinstall": "node bin/shim-tsgo.js",
     "start": "yarn start:browser",
     "start:server": "yarn workspace @actual-app/sync-server start",
     "start:server-monitor": "yarn workspace @actual-app/sync-server start-monitor",
