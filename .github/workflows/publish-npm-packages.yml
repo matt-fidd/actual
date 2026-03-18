@@ -35,6 +35,13 @@ jobs:
         run: |
           yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
 
+      - name: Build CLI
+        run: yarn workspace @actual-app/cli build
+
+      - name: Pack the cli package
+        run: |
+          yarn workspace @actual-app/cli pack --filename @actual-app/cli.tgz
+
       - name: Upload package artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
@@ -44,6 +51,7 @@ jobs:
             packages/desktop-client/@actual-app/web.tgz
             packages/sync-server/@actual-app/sync-server.tgz
             packages/api/@actual-app/api.tgz
+            packages/cli/@actual-app/cli.tgz
 
   publish:
     runs-on: ubuntu-latest
@@ -85,5 +93,11 @@ jobs:
       - name: Publish API
         run: |
           npm publish api/@actual-app/api.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish CLI
+        run: |
+          npm publish cli/@actual-app/cli.tgz --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -24,12 +24,14 @@ jobs:
           NEW_WEB_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/desktop-client/package.json --type nightly)
           NEW_SYNC_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/sync-server/package.json --type nightly)
           NEW_API_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/api/package.json --type nightly)
+          NEW_CLI_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/cli/package.json --type nightly)
 
           # Set package versions
           npm version $NEW_CORE_VERSION --no-git-tag-version --workspace=@actual-app/core --no-workspaces-update
           npm version $NEW_WEB_VERSION --no-git-tag-version --workspace=@actual-app/web --no-workspaces-update
           npm version $NEW_SYNC_VERSION --no-git-tag-version --workspace=@actual-app/sync-server --no-workspaces-update
           npm version $NEW_API_VERSION --no-git-tag-version --workspace=@actual-app/api --no-workspaces-update
+          npm version $NEW_CLI_VERSION --no-git-tag-version --workspace=@actual-app/cli --no-workspaces-update
 
       - name: Yarn install
         run: |
@@ -54,6 +56,13 @@ jobs:
         run: |
           yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
 
+      - name: Build CLI
+        run: yarn workspace @actual-app/cli build
+
+      - name: Pack the cli package
+        run: |
+          yarn workspace @actual-app/cli pack --filename @actual-app/cli.tgz
+
       - name: Upload package artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
@@ -63,6 +72,7 @@ jobs:
             packages/desktop-client/@actual-app/web.tgz
             packages/sync-server/@actual-app/sync-server.tgz
             packages/api/@actual-app/api.tgz
+            packages/cli/@actual-app/cli.tgz
 
   publish:
     runs-on: ubuntu-latest
@@ -104,5 +114,11 @@ jobs:
       - name: Publish API
         run: |
           npm publish api/@actual-app/api.tgz --access public --tag nightly
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish CLI
+        run: |
+          npm publish cli/@actual-app/cli.tgz --access public --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

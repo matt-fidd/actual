@@ -19,7 +19,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actual-app/api@workspace:packages/api":
+"@actual-app/api@workspace:*, @actual-app/api@workspace:packages/api":
   version: 0.0.0-use.local
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
@@ -46,6 +46,25 @@ __metadata:
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     extensionless: "npm:^2.0.6"
     vitest: "npm:^4.1.0"
+  languageName: unknown
+  linkType: soft
+
+"@actual-app/cli@workspace:packages/cli":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/cli@workspace:packages/cli"
+  dependencies:
+    "@actual-app/api": "workspace:*"
+    "@types/node": "npm:^22.19.15"
+    "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
+    cli-table3: "npm:^0.6.5"
+    commander: "npm:^13.0.0"
+    cosmiconfig: "npm:^9.0.0"
+    rollup-plugin-visualizer: "npm:^6.0.11"
+    vite: "npm:^8.0.0"
+    vitest: "npm:^4.1.0"
+  bin:
+    actual: ./dist/cli.js
+    actual-cli: ./dist/cli.js
   languageName: unknown
   linkType: soft
 
@@ -13194,7 +13213,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cli-table3@npm:^0.6.3":
+"cli-table3@npm:^0.6.3, cli-table3@npm:^0.6.5":
   version: 0.6.5
   resolution: "cli-table3@npm:0.6.5"
   dependencies:
@@ -13501,6 +13520,13 @@ __metadata:
   version: 12.1.0
   resolution: "commander@npm:12.1.0"
   checksum: 10/cdaeb672d979816853a4eed7f1310a9319e8b976172485c2a6b437ed0db0a389a44cfb222bfbde772781efa9f215bdd1b936f80d6b249485b465c6cb906e1f93
+  languageName: node
+  linkType: hard
+
+"commander@npm:^13.0.0":
+  version: 13.1.0
+  resolution: "commander@npm:13.1.0"
+  checksum: 10/d3b4b79e6be8471ddadacbb8cd441fe82154d7da7393b50e76165a9e29ccdb74fa911a186437b9a211d0fc071db6051915c94fb8ef16d77511d898e9dbabc6af
   languageName: node
   linkType: hard
 
@@ -13901,6 +13927,23 @@ __metadata:
     typescript:
       optional: true
   checksum: 10/91d082baca0f33b1c085bf010f9ded4af43cbedacba8821da0fb5667184d0a848addc52c31fadd080007f904a555319c238cf5f4c03e6d58ece2e4876b2e73d6
+  languageName: node
+  linkType: hard
+
+"cosmiconfig@npm:^9.0.0":
+  version: 9.0.1
+  resolution: "cosmiconfig@npm:9.0.1"
+  dependencies:
+    env-paths: "npm:^2.2.1"
+    import-fresh: "npm:^3.3.0"
+    js-yaml: "npm:^4.1.0"
+    parse-json: "npm:^5.2.0"
+  peerDependencies:
+    typescript: ">=4.9.5"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10/89fcac84d062f0710091bb2d6a6175bcde22f5448877db9c43429694408191d3d4e215193b3ac4d54f7f89ef188d55cd481c7a2295b0dc572e65b528bf6fec01
   languageName: node
   linkType: hard
 
@@ -15697,7 +15740,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"env-paths@npm:^2.2.0":
+"env-paths@npm:^2.2.0, env-paths@npm:^2.2.1":
   version: 2.2.1
   resolution: "env-paths@npm:2.2.1"
   checksum: 10/65b5df55a8bab92229ab2b40dad3b387fad24613263d103a97f91c9fe43ceb21965cd3392b1ccb5d77088021e525c4e0481adb309625d0cb94ade1d1fb8dc17e

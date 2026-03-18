@@ -57,6 +57,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: api
           ref: ${{github.base_ref}}
+      - name: Wait for ${{github.base_ref}} CLI build to succeed
+        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
+        id: master-cli-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: cli
+          ref: ${{github.base_ref}}
 
       - name: Wait for PR build to succeed
         uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
@@ -72,9 +79,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: api
           ref: ${{github.event.pull_request.head.sha}}
+      - name: Wait for CLI PR build to succeed
+        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
+        id: wait-for-cli-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: cli
+          ref: ${{github.event.pull_request.head.sha}}
 
       - name: Report build failure
-        if: steps.wait-for-web-build.outputs.conclusion == 'failure' || steps.wait-for-api-build.outputs.conclusion == 'failure'
+        if: steps.wait-for-web-build.outputs.conclusion == 'failure' || steps.wait-for-api-build.outputs.conclusion == 'failure' || steps.wait-for-cli-build.outputs.conclusion == 'failure'
         run: |
           echo "Build failed on PR branch or ${{github.base_ref}}"
           exit 1
@@ -115,6 +129,23 @@ jobs:
           name: api-build-stats
           path: head
           allow_forks: true
+      - name: Download CLI build artifact from ${{github.base_ref}}
+        uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+        with:
+          branch: ${{github.base_ref}}
+          workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          name: cli-build-stats
+          path: base
+      - name: Download CLI stats from PR
+        uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+        with:
+          pr: ${{github.event.pull_request.number}}
+          workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          name: cli-build-stats
+          path: head
+          allow_forks: true
       - name: Strip content hashes from stats files
         run: |
           if [ -f ./head/web-stats.json ]; then
@@ -136,9 +167,11 @@ jobs:
             --base desktop-client=./base/web-stats.json \
             --base loot-core=./base/loot-core-stats.json \
             --base api=./base/api-stats.json \
+            --base cli=./base/cli-stats.json \
             --head desktop-client=./head/web-stats.json \
             --head loot-core=./head/loot-core-stats.json \
             --head api=./head/api-stats.json \
+            --head cli=./head/cli-stats.json \
             --identifier combined \
             --format pr-body > bundle-stats-comment.md
       - name: Post combined bundle stats comment

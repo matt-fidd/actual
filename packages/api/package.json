@@ -9,6 +9,20 @@
   ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./@types/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
   "scripts": {
     "build": "vite build",
     "test": "vitest --run",
