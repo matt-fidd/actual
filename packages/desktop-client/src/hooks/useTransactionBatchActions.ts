@@ -457,6 +457,7 @@ export function useTransactionBatchActions() {
         .options({ splits: 'grouped' }),
     );
     const transactions = ungroupTransactions(data as TransactionEntity[]);
+
     if (transactions.length > 0) {
       dispatch(
         pushModal({
@@ -471,9 +472,46 @@ export function useTransactionBatchActions() {
           },
         }),
       );
-    } else {
-      onConfirm(ids);
+      return;
     }
+
+    // check paired transfer transactions
+    const { data: selectedData } = await aqlQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select(['transfer_id']),
+    );
+
+    const transferIds = (selectedData as TransactionEntity[])
+      .map(t => t.transfer_id)
+      .filter((id): id is string => id != null);
+
+    if (transferIds.length > 0) {
+      const { data: reconciledTransfers } = await aqlQuery(
+        q('transactions')
+          .filter({ id: { $oneof: transferIds }, reconciled: true })
+          .select('*'),
+      );
+
+      if ((reconciledTransfers as TransactionEntity[]).length > 0) {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'confirm-transaction-edit',
+              options: {
+                onConfirm: () => {
+                  onConfirm(ids);
+                },
+                confirmReason: confirmReason + 'Transfer',
+              },
+            },
+          }),
+        );
+        return;
+      }
+    }
+
+    onConfirm(ids);
   };
 
   const onSetTransfer = async (
