@@ -21,9 +21,17 @@ import type {
 } from 'loot-core/types/models';
 
 import { pushModal } from '@desktop-client/modals/modalsSlice';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type {
+  ConfirmTransactionEditReason,
+  Modal as ModalType,
+} from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
+
+type BatchReconciledReason = Extract<
+  ConfirmTransactionEditReason,
+  `batch${string}Reconciled`
+>;
 
 type BatchEditProps = {
   name: keyof TransactionEntity;
@@ -431,9 +439,18 @@ export function useTransactionBatchActions() {
     onSuccess?.(ids);
   };
 
+  const transferReasonMap: Record<
+    BatchReconciledReason,
+    ConfirmTransactionEditReason
+  > = {
+    batchDeleteWithReconciled: 'batchDeleteWithReconciledTransfer',
+    batchEditWithReconciled: 'batchEditWithReconciledTransfer',
+    batchDuplicateWithReconciled: 'batchDuplicateWithReconciledTransfer',
+  };
+
   const checkForReconciledTransactions = async (
     ids: Array<TransactionEntity['id']>,
-    confirmReason: string,
+    confirmReason: BatchReconciledReason,
     onConfirm: (ids: Array<TransactionEntity['id']>) => void,
   ) => {
     const { data } = await aqlQuery(
@@ -488,7 +505,7 @@ export function useTransactionBatchActions() {
                 onConfirm: () => {
                   onConfirm(ids);
                 },
-                confirmReason: confirmReason + 'Transfer',
+                confirmReason: transferReasonMap[confirmReason],
               },
             },
           }),
