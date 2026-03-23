@@ -242,49 +242,35 @@ export function useTransactionBatchActions() {
       );
     };
 
+    const openFieldEditor = () => {
+      if (name === 'cleared') {
+        // Cleared just toggles it on/off and it depends on the data
+        // loaded. Need to clean this up in the future.
+        void onChange('cleared', null);
+      } else if (name === 'category') {
+        pushCategoryAutocompleteModal();
+      } else if (name === 'payee') {
+        pushPayeeAutocompleteModal();
+      } else if (name === 'account') {
+        pushAccountAutocompleteModal();
+      } else {
+        pushEditField();
+      }
+    };
+
     if (
       name === 'amount' ||
       name === 'payee' ||
       name === 'account' ||
       name === 'date'
     ) {
-      const reconciledTransactions = transactions.filter(t => t.reconciled);
-      if (reconciledTransactions.length > 0) {
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'confirm-transaction-edit',
-              options: {
-                onConfirm: () => {
-                  if (name === 'payee') {
-                    pushPayeeAutocompleteModal();
-                  } else if (name === 'account') {
-                    pushAccountAutocompleteModal();
-                  } else {
-                    pushEditField();
-                  }
-                },
-                confirmReason: 'batchEditWithReconciled',
-              },
-            },
-          }),
-        );
-        return;
-      }
-    }
-
-    if (name === 'cleared') {
-      // Cleared just toggles it on/off and it depends on the data
-      // loaded. Need to clean this up in the future.
-      void onChange('cleared', null);
-    } else if (name === 'category') {
-      pushCategoryAutocompleteModal();
-    } else if (name === 'payee') {
-      pushPayeeAutocompleteModal();
-    } else if (name === 'account') {
-      pushAccountAutocompleteModal();
+      await checkForReconciledTransactions(
+        ids,
+        'batchEditWithReconciled',
+        openFieldEditor,
+      );
     } else {
-      pushEditField();
+      openFieldEditor();
     }
   };
 
