@@ -766,7 +766,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         return;
       }
 
-      if (unserializedTransaction.reconciled) {
+      if (unserializedTransactions.some(t => t.reconciled)) {
         // On mobile any save gives the warning.
         // On the web only certain changes trigger a warning.
         // Should we bring that here as well? Or does the nature of the editing form
@@ -782,32 +782,38 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             },
           }),
         );
-      } else if (unserializedTransaction.transfer_id) {
-        const { data } = await aqlQuery(
-          q('transactions')
-            .filter({
-              id: unserializedTransaction.transfer_id,
-              reconciled: true,
-            })
-            .select('id'),
-        );
-        if ((data as TransactionEntity[]).length > 0) {
-          dispatch(
-            pushModal({
-              modal: {
-                name: 'confirm-transaction-edit',
-                options: {
-                  onConfirm: onConfirmSave,
-                  confirmReason: 'batchEditWithReconciledTransfer',
-                },
-              },
-            }),
+      } else {
+        const transferIds = unserializedTransactions
+          .map(t => t.transfer_id)
+          .filter((id): id is string => id != null);
+
+        if (transferIds.length > 0) {
+          const { data } = await aqlQuery(
+            q('transactions')
+              .filter({
+                id: { $oneof: transferIds },
+                reconciled: true,
+              })
+              .select('id'),
           );
+          if ((data as TransactionEntity[]).length > 0) {
+            dispatch(
+              pushModal({
+                modal: {
+                  name: 'confirm-transaction-edit',
+                  options: {
+                    onConfirm: onConfirmSave,
+                    confirmReason: 'batchEditWithReconciledTransfer',
+                  },
+                },
+              }),
+            );
+          } else {
+            onConfirmSave();
+          }
         } else {
           onConfirmSave();
         }
-      } else {
-        onConfirmSave();
       }
     }, [
       isAdding,
@@ -968,7 +974,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const onDeleteInner = useCallback(
       async (id: TransactionEntity['id']) => {
-        const [unserializedTransaction] = unserializedTransactions;
+        const [parentTransaction] = unserializedTransactions;
+        const targetTransaction =
+          unserializedTransactions.find(t => t.id === id) ?? parentTransaction;
 
         const onConfirmDelete = () => {
           dispatch(
@@ -982,7 +990,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   onConfirm: () => {
                     onDelete(id);
 
-                    if (unserializedTransaction.id !== id) {
+                    if (parentTransaction.id !== id) {
                       // Only a child transaction was deleted.
                       onClearActiveEdit();
                       return;
@@ -996,7 +1004,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           );
         };
 
-        if (unserializedTransaction.reconciled) {
+        if (targetTransaction.reconciled) {
           dispatch(
             pushModal({
               modal: {
@@ -1008,11 +1016,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               },
             }),
           );
-        } else if (unserializedTransaction.transfer_id) {
+        } else if (targetTransaction.transfer_id) {
           const { data } = await aqlQuery(
             q('transactions')
               .filter({
-                id: unserializedTransaction.transfer_id,
+                id: targetTransaction.transfer_id,
                 reconciled: true,
               })
               .select('id'),
