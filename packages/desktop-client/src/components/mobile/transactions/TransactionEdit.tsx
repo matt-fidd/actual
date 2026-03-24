@@ -686,7 +686,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [categories, isBudgetTransfer, t],
     );
 
-    const onSaveInner = useCallback(() => {
+    const onSaveInner = useCallback(async () => {
       const [unserializedTransaction] = unserializedTransactions;
 
       const onConfirmSave = () => {
@@ -782,6 +782,30 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             },
           }),
         );
+      } else if (unserializedTransaction.transfer_id) {
+        const { data } = await aqlQuery(
+          q('transactions')
+            .filter({
+              id: unserializedTransaction.transfer_id,
+              reconciled: true,
+            })
+            .select('id'),
+        );
+        if ((data as TransactionEntity[]).length > 0) {
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'confirm-transaction-edit',
+                options: {
+                  onConfirm: onConfirmSave,
+                  confirmReason: 'batchEditWithReconciledTransfer',
+                },
+              },
+            }),
+          );
+        } else {
+          onConfirmSave();
+        }
       } else {
         onConfirmSave();
       }
@@ -943,7 +967,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
 
     const onDeleteInner = useCallback(
-      (id: TransactionEntity['id']) => {
+      async (id: TransactionEntity['id']) => {
         const [unserializedTransaction] = unserializedTransactions;
 
         const onConfirmDelete = () => {
@@ -984,6 +1008,30 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               },
             }),
           );
+        } else if (unserializedTransaction.transfer_id) {
+          const { data } = await aqlQuery(
+            q('transactions')
+              .filter({
+                id: unserializedTransaction.transfer_id,
+                reconciled: true,
+              })
+              .select('id'),
+          );
+          if ((data as TransactionEntity[]).length > 0) {
+            dispatch(
+              pushModal({
+                modal: {
+                  name: 'confirm-transaction-edit',
+                  options: {
+                    onConfirm: onConfirmDelete,
+                    confirmReason: 'batchDeleteWithReconciledTransfer',
+                  },
+                },
+              }),
+            );
+          } else {
+            onConfirmDelete();
+          }
         } else {
           onConfirmDelete();
         }
