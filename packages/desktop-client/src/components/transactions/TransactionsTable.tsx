@@ -152,6 +152,7 @@ import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { getPayeesById } from '@desktop-client/payees';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {
@@ -993,7 +994,7 @@ const Transaction = memo(function Transaction({
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
 
-  const onUpdate: TransactionUpdateFunction = (name, value) => {
+  const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
     // modal if the transaction is locked. I added a boolean to guard against showing the modal twice.
     // I'm still not completely happy with how the cells update pre/post modal. Sometimes you have to
@@ -1002,14 +1003,14 @@ const Transaction = memo(function Transaction({
     // of the cell all have different implications as well.
 
     if (transaction[name] !== value) {
-      if (
-        transaction.reconciled === true &&
-        (name === 'credit' ||
-          name === 'debit' ||
-          name === 'payee' ||
-          name === 'account' ||
-          name === 'date')
-      ) {
+      const isReconciledField =
+        name === 'credit' ||
+        name === 'debit' ||
+        name === 'payee' ||
+        name === 'account' ||
+        name === 'date';
+
+      if (transaction.reconciled === true && isReconciledField) {
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
           dispatch(
@@ -1029,6 +1030,38 @@ const Transaction = memo(function Transaction({
               },
             }),
           );
+        }
+      } else if (
+        isReconciledField &&
+        transaction.transfer_id &&
+        showReconciliationWarning === false
+      ) {
+        const { data } = await aqlQuery(
+          q('transactions')
+            .filter({ id: transaction.transfer_id, reconciled: true })
+            .select('id'),
+        );
+        if ((data as TransactionEntity[]).length > 0) {
+          setShowReconciliationWarning(true);
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'confirm-transaction-edit',
+                options: {
+                  onCancel: () => {
+                    setShowReconciliationWarning(false);
+                  },
+                  onConfirm: () => {
+                    setShowReconciliationWarning(false);
+                    onUpdateAfterConfirm(name, value);
+                  },
+                  confirmReason: 'batchEditWithReconciledTransfer',
+                },
+              },
+            }),
+          );
+        } else {
+          onUpdateAfterConfirm(name, value);
         }
       } else {
         onUpdateAfterConfirm(name, value);
