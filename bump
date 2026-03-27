@@ -1,0 +1,15 @@
+#!/usr/bin/ksh
+
+vi packages/sync-server/package.json
+
+MAKE=gmake CC=/opt/gcc-13/bin/gcc NODE_JQ_SKIP_INSTALL_BINARY=true ELECTRON_SKIP_BINARY_DOWNLOAD=1 /opt/ooce/bin/yarn
+
+git sq .
+
+git com
+git pu
+git sb
+
+git rbm
+
+git po -f
