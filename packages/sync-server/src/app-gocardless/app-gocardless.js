@@ -1,6 +1,5 @@
 import path from 'path';
 
-import { isAxiosError } from 'axios';
 import express from 'express';
 
 import { sha256String } from '../util/hash';
@@ -15,6 +14,7 @@ import {
   RateLimitError,
   RequisitionNotLinked,
 } from './errors';
+import { GoCardlessApiError } from './services/gocardless-api';
 import { goCardlessService } from './services/gocardless-service';
 import { handleError } from './util/handle-error';
 
@@ -249,7 +249,7 @@ app.post(
             error_code: 'NORDIGEN_ERROR',
           });
           break;
-        case isAxiosError(error):
+        case error instanceof GoCardlessApiError:
           console.log(
             'Something went wrong',
             error.message,
