@@ -110,6 +110,7 @@ export class GoCardlessApi {
     const response = await fetch(url, {
       method,
       headers,
+      signal: AbortSignal.timeout(20000),
       ...(body
         ? {
             body: JSON.stringify(

@@ -390,7 +390,7 @@ export const goCardlessService = {
     );
 
     return accounts.map(account => {
-      const institution = institutionsById[account.institution_id] || null;
+      const institution = institutionsById[account.institution_id];
       return {
         ...account,
         institution,

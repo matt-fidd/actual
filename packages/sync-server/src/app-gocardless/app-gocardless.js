@@ -14,9 +14,21 @@ import {
   RateLimitError,
   RequisitionNotLinked,
 } from './errors';
-import { GoCardlessApiError } from './services/gocardless-api';
 import { goCardlessService } from './services/gocardless-service';
 import { handleError } from './util/handle-error';
+
+function validateOrigin(origin) {
+  let url;
+  try {
+    url = new URL(origin);
+  } catch {
+    throw new Error('Invalid Origin header');
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error('Invalid Origin header');
+  }
+  return url.origin;
+}
 
 const SAFE_ID = /^[a-zA-Z0-9_-]+$/;
 function sanitizeId(id) {
@@ -50,12 +62,12 @@ app.post(
   '/create-web-token',
   handleError(async (req, res) => {
     const { institutionId: rawInstitutionId } = req.body || {};
-    const { origin } = req.headers;
     const institutionId = sanitizeId(rawInstitutionId);
+    const host = validateOrigin(req.headers.origin);
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
       institutionId,
-      host: origin,
+      host,
     });
 
     res.send({
@@ -218,7 +230,7 @@ app.post(
 
       const rateLimitHeaders = Object.fromEntries(
         Object.entries(headers).filter(([key]) =>
-          key.startsWith('http_x_ratelimit'),
+          key.startsWith('x-ratelimit-'),
         ),
       );
 
@@ -256,17 +268,6 @@ app.post(
           break;
         case error instanceof GenericGoCardlessError:
           console.log('Something went wrong', error.message);
-          sendErrorResponse({
-            error_type: 'SYNC_ERROR',
-            error_code: 'NORDIGEN_ERROR',
-          });
-          break;
-        case error instanceof GoCardlessApiError:
-          console.log(
-            'Something went wrong',
-            error.message,
-            error.response?.data?.summary || error.response?.data?.detail || '',
-          );
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',
