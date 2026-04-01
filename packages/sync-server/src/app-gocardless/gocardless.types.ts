@@ -12,7 +12,7 @@ import type {
 export type DetailedAccount = Omit<GoCardlessAccountDetails, 'status'> &
   GoCardlessAccountMetadata;
 export type DetailedAccountWithInstitution = DetailedAccount & {
-  institution: Institution;
+  institution: Institution | null;
 };
 export type TransactionWithBookedStatus = Transaction & { booked: boolean };
 
@@ -25,7 +25,7 @@ export type NormalizedAccountDetails = {
   /**
    * Institution of account
    */
-  institution: Institution;
+  institution: Institution | null;
 
   /**
    * last 4 digits from the account iban
