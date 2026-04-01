@@ -110,7 +110,15 @@ export class GoCardlessApi {
     const response = await fetch(url, {
       method,
       headers,
-      ...(body ? { body: JSON.stringify(body) } : {}),
+      ...(body
+        ? {
+            body: JSON.stringify(
+              Object.fromEntries(
+                Object.entries(body).filter(([, v]) => v != null),
+              ),
+            ),
+          }
+        : {}),
     });
 
     if (!response.ok) {
@@ -122,6 +130,10 @@ export class GoCardlessApi {
       try {
         error.response.data = await response.json();
       } catch {}
+      console.log(
+        `GoCardless ${method} ${endpoint} ${response.status}`,
+        error.response.data ? JSON.stringify(error.response.data) : '(no body)',
+      );
       throw error;
     }
 
