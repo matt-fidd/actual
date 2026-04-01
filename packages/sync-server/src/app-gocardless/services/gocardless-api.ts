@@ -11,6 +11,7 @@ import type {
 import type { GetBalances, GetTransactionsResponse } from '../gocardless.types';
 
 const BASE_URL = 'https://bankaccountdata.gocardless.com/api/v2';
+const ALLOWED_ORIGIN = new URL(BASE_URL).origin;
 
 export type TokenResponse = {
   access: string;
@@ -101,7 +102,12 @@ export class GoCardlessApi {
       headers.Authorization = `Bearer ${this.#token}`;
     }
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
+    const url = new URL(`${BASE_URL}${endpoint}`);
+    if (url.origin !== ALLOWED_ORIGIN || !url.pathname.startsWith('/api/v2/')) {
+      throw new Error(`Invalid GoCardless API endpoint: ${endpoint}`);
+    }
+
+    const response = await fetch(url, {
       method,
       headers,
       ...(body ? { body: JSON.stringify(body) } : {}),
