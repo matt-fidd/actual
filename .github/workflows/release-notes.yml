@@ -3,6 +3,10 @@ name: Release notes
 on:
   pull_request:
 
+permissions:
+  contents: write
+  pull-requests: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -14,8 +18,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          fetch-depth: 0
+          fetch-depth: 2
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+
+      - name: Check if triggered by bot
+        id: bot-check
+        run: |
+          AUTHOR=$(git log -1 --format='%an')
+          MESSAGE=$(git log -1 --format='%s')
+          if [ "$AUTHOR" = "github-actions[bot]" ] && echo "$MESSAGE" | grep -q '^Generate release notes'; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Get changed files
+        if: steps.bot-check.outputs.skip != 'true'
         id: changed-files
         run: |
           git fetch origin ${{ github.base_ref }}
@@ -28,9 +46,16 @@ jobs:
           else
             echo "only_docs=false" >> $GITHUB_OUTPUT
           fi
+
       - name: Check release notes
-        if: startsWith(github.head_ref, 'release/') == false && steps.changed-files.outputs.only_docs != 'true'
+        if: >-
+          steps.bot-check.outputs.skip != 'true'
+          && startsWith(github.head_ref, 'release/') == false
+          && steps.changed-files.outputs.only_docs != 'true'
         uses: ./.github/actions/release-notes/check
+
       - name: Generate release notes
-        if: startsWith(github.head_ref, 'release/') == true
+        if: >-
+          steps.bot-check.outputs.skip != 'true'
+          && startsWith(github.head_ref, 'release/') == true
         uses: ./.github/actions/release-notes/generate
