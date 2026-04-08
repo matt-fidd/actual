@@ -73,12 +73,12 @@ jobs:
             fi
 
             echo "Cherry-picking #${NUMBER} (${SHA})..."
-            git fetch origin "$SHA" 2>/dev/null || true
+            git fetch origin master
 
-            if git cherry-pick "$SHA" --no-edit 2>/dev/null; then
+            if git cherry-pick "$SHA" --no-edit; then
               echo "  Success"
               RESULTS=$(echo "$RESULTS" | jq -c ". + [{\"number\": \"$NUMBER\", \"status\": \"ok\"}]")
-            elif git cherry-pick --abort 2>/dev/null && git cherry-pick -m 1 "$SHA" --no-edit 2>/dev/null; then
+            elif git cherry-pick --abort && git cherry-pick -m 1 "$SHA" --no-edit; then
               echo "  Success (merge commit)"
               RESULTS=$(echo "$RESULTS" | jq -c ". + [{\"number\": \"$NUMBER\", \"status\": \"ok\"}]")
             else
