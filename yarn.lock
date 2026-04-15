@@ -28,6 +28,7 @@ __metadata:
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
     better-sqlite3: "npm:^12.8.0"
     compare-versions: "npm:^6.1.1"
+    peggy: "npm:5.1.0"
     rollup-plugin-visualizer: "npm:^7.0.1"
     typescript-strict-plugin: "npm:^2.4.4"
     uuid: "npm:^13.0.0"
@@ -73,6 +74,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/components@workspace:packages/component-library"
   dependencies:
+    "@babel/core": "npm:^7.29.0"
     "@chromatic-com/storybook": "npm:^5.1.1"
     "@emotion/css": "npm:^11.13.5"
     "@storybook/addon-a11y": "npm:^10.3.4"
@@ -83,6 +85,7 @@ __metadata:
     "@types/react": "npm:^19.2.14"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
     "@vitejs/plugin-react": "npm:^6.0.1"
+    eslint: "npm:^10.2.0"
     eslint-plugin-storybook: "npm:^10.3.4"
     react: "npm:19.2.4"
     react-aria-components: "npm:^1.16.0"
@@ -144,6 +147,7 @@ __metadata:
     stream-browserify: "npm:^3.0.0"
     timers-browserify: "npm:^2.0.12"
     ts-node: "npm:^10.9.2"
+    typescript: "npm:^6.0.2"
     typescript-strict-plugin: "npm:^2.4.4"
     ua-parser-js: "npm:^2.0.9"
     util: "npm:^0.12.5"
@@ -296,6 +300,7 @@ __metadata:
     react-grid-layout: "npm:^2.2.3"
     react-hotkeys-hook: "npm:^5.2.4"
     react-i18next: "npm:^16.6.6"
+    react-is: "npm:19.2.4"
     react-markdown: "npm:^10.1.0"
     react-modal: "npm:3.16.3"
     react-redux: "npm:^9.2.0"
@@ -15760,6 +15765,7 @@ __metadata:
   resolution: "eslint-plugin-actual@workspace:packages/eslint-plugin-actual"
   dependencies:
     "@oxlint/plugins": "npm:^1.60.0"
+    eslint: "npm:^10.2.0"
     eslint-vitest-rule-tester: "npm:^3.1.0"
     vitest: "npm:^4.1.2"
   languageName: unknown
@@ -24358,6 +24364,13 @@ __metadata:
     typescript:
       optional: true
   checksum: 10/5916b8eb0bf2e8d6aef06077640c2ac81603b47aca82c1314c73be3604f0a64337964049d6efc07607f296209f02ffe2ba7a0fa6fbed570f3d5e1b83ee8a4059
+  languageName: node
+  linkType: hard
+
+"react-is@npm:19.2.4":
+  version: 19.2.4
+  resolution: "react-is@npm:19.2.4"
+  checksum: 10/3360fc50a38c23299c5003a709949f2439b2901e77962eea78d892f526f710d05a7777b600b302f853583d1861979b00d7a0a071c89c6562eac5740ac29b9665
   languageName: node
   linkType: hard
 
