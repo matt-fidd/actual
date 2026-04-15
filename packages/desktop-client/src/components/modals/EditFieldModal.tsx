@@ -253,6 +253,7 @@ export function EditFieldModal({
       break;
 
     default:
+      throw new Error(`Unhandled edit field name: ${name}`);
   }
 
   return (
