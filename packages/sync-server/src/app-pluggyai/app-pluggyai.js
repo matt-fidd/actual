@@ -188,7 +188,7 @@ function flattenObject(obj, prefix = '') {
       continue;
     }
 
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    if (typeof value === 'object' && !Array.isArray(value)) {
       Object.assign(result, flattenObject(value, newKey));
     } else {
       result[newKey] = value;

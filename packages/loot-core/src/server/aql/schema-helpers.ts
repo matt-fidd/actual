@@ -38,7 +38,7 @@ export function convertInputType(value, type) {
     case 'boolean':
       return value ? 1 : 0;
     case 'id':
-      if (typeof value !== 'string' && value !== null) {
+      if (typeof value !== 'string') {
         throw new Error('Invalid id, must be string: ' + value);
       }
       return value;

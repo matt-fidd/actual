@@ -132,8 +132,5 @@ export function getMutatorContext() {
     return {};
   }
 
-  if (currentContext == null && globalMutationsEnabled) {
-    return {};
-  }
   return currentContext;
 }
