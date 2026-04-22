@@ -41,6 +41,7 @@ __metadata:
   resolution: "@actual-app/ci-actions@workspace:packages/ci-actions"
   dependencies:
     "@octokit/rest": "npm:^22.0.1"
+    "@octokit/webhooks-types": "npm:^7.6.1"
     "@typescript/native-preview": "npm:beta"
     extensionless: "npm:^2.0.6"
     gray-matter: "npm:^4.0.3"
@@ -5465,6 +5466,13 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": "npm:^27.0.0"
   checksum: 10/03d5cfc29556a9b53eae8beb1bf15c0b704dc722db2c51b53f093f3c3ee6c1d8e20b682be8117a3a17034b458be7746d1b22aaefb959ceb5152ad7589b39e2c9
+  languageName: node
+  linkType: hard
+
+"@octokit/webhooks-types@npm:^7.6.1":
+  version: 7.6.1
+  resolution: "@octokit/webhooks-types@npm:7.6.1"
+  checksum: 10/0b11bd7e8d13b5a9cf14214421298a423d0180a5e1aaaea876ee4db6f97b5cca536f48d89af63105db75419d777a2402733eb0e110002d4dd59581ef36037bdc
   languageName: node
   linkType: hard
 

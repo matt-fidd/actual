@@ -38,58 +38,14 @@ jobs:
     permissions:
       issues: write
     steps:
-      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          script: |
-            const { owner, repo } = context.repo;
-            const cutoff = 7 * 24 * 60 * 60 * 1000; // 7 days
-            const now = Date.now();
-
-            const issues = await github.paginate(github.rest.issues.listForRepo, {
-              owner, repo, state: 'open', labels: 'needs info', per_page: 100,
-            });
-
-            const closeIssue = async number => {
-              await github.rest.issues.createComment({
-                owner, repo, issue_number: number,
-                body: 'This issue has been automatically closed because there have been no comments for 7 days after the "needs info" label was added. If you still need help, please feel free to reopen the issue with the requested information.',
-              });
-              await github.rest.issues.update({
-                owner, repo, issue_number: number, state: 'closed',
-              });
-            };
-
-            for (const issue of issues) {
-              if (issue.pull_request) continue;
-
-              if (now - new Date(issue.updated_at).getTime() >= cutoff) {
-                await closeIssue(issue.number);
-                continue;
-              }
-
-              const events = await github.paginate(
-                github.rest.issues.listEventsForTimeline,
-                { owner, repo, issue_number: issue.number, per_page: 100 },
-              );
-
-              const labelings = events.filter(
-                e => e.event === 'labeled' && e.label?.name === 'needs info',
-              );
-              if (labelings.length === 0) continue;
-              const labelAddedAt = new Date(
-                labelings[labelings.length - 1].created_at,
-              ).getTime();
-
-              const comments = await github.paginate(
-                github.rest.issues.listComments,
-                { owner, repo, issue_number: issue.number, per_page: 100 },
-              );
-              const lastCommentAt = comments.length
-                ? new Date(comments[comments.length - 1].created_at).getTime()
-                : 0;
-
-              const effective = Math.max(labelAddedAt, lastCommentAt);
-              if (now - effective < cutoff) continue;
-
-              await closeIssue(issue.number);
-            }
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Close stale needs-info issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: yarn workspace @actual-app/ci-actions tsx bin/close-stale-needs-info.ts
