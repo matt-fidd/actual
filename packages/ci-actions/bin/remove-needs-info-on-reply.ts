@@ -28,9 +28,19 @@ if (
 }
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-await octokit.issues.removeLabel({
-  owner,
-  repo,
-  issue_number: event.issue.number,
-  name: LABEL,
-});
+try {
+  await octokit.issues.removeLabel({
+    owner,
+    repo,
+    issue_number: event.issue.number,
+    name: LABEL,
+  });
+} catch (err) {
+  // Another run may have removed the label in the meantime; anything else
+  // should still surface.
+  if (
+    !(err && typeof err === 'object' && 'status' in err && err.status === 404)
+  ) {
+    throw err;
+  }
+}
