@@ -212,12 +212,15 @@ export function BudgetAutomationsBody({
     dryRun?.perTemplate?.[i] != null ? dryRun.perTemplate[i] : null,
   );
   const hasErrors = automationErrors.some(error => error !== null);
-  const percentSum = templates.reduce<number>((sum, t) => {
-    if (t.type === 'percentage') return sum + t.percent;
-    return sum;
-  }, 0);
+  const percentBySource = new Map<string, number>();
+  for (const t of templates) {
+    if (t.type !== 'percentage') continue;
+    const key = `${t.previous}|${t.category.toLocaleLowerCase()}`;
+    percentBySource.set(key, (percentBySource.get(key) ?? 0) + t.percent);
+  }
+  const maxPercent = Math.max(0, ...percentBySource.values());
   const conflict: GlobalConflictKind | null =
-    percentSum > 100 ? { kind: 'percent-over-100', total: percentSum } : null;
+    maxPercent > 100 ? { kind: 'percent-over-100', total: maxPercent } : null;
 
   const categoryNameMap: Record<string, string> = {};
   for (const group of categories) {
