@@ -19,8 +19,10 @@ import {
 } from '#components/budget/goals/automationExamples';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
 import { formatMonthLabel } from '#components/budget/goals/formatMonthLabel';
-import { validateAutomation } from '#components/budget/goals/validateAutomation';
-import type { GlobalConflictKind } from '#components/budget/goals/validateAutomation';
+import {
+  validateAutomation,
+  validatePercentageAllocation,
+} from '#components/budget/goals/validateAutomation';
 import { Link } from '#components/common/Link';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -212,15 +214,7 @@ export function BudgetAutomationsBody({
     dryRun?.perTemplate?.[i] != null ? dryRun.perTemplate[i] : null,
   );
   const hasErrors = automationErrors.some(error => error !== null);
-  const percentBySource = new Map<string, number>();
-  for (const t of templates) {
-    if (t.type !== 'percentage') continue;
-    const key = `${t.previous}|${t.category.toLocaleLowerCase()}`;
-    percentBySource.set(key, (percentBySource.get(key) ?? 0) + t.percent);
-  }
-  const maxPercent = Math.max(0, ...percentBySource.values());
-  const conflict: GlobalConflictKind | null =
-    maxPercent > 100 ? { kind: 'percent-over-100', total: maxPercent } : null;
+  const conflict = validatePercentageAllocation(templates);
 
   const categoryNameMap: Record<string, string> = {};
   for (const group of categories) {
