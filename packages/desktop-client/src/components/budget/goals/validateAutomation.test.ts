@@ -50,6 +50,14 @@ describe('validatePercentageAllocation', () => {
     ).toBeNull();
   });
 
+  it('ignores templates with a missing source', () => {
+    const orphan = {
+      ...percent('Salary', 100),
+      category: null as unknown as string,
+    };
+    expect(validatePercentageAllocation([orphan])).toBeNull();
+  });
+
   it('matches sources case-insensitively', () => {
     expect(
       validatePercentageAllocation([

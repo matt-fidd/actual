@@ -99,7 +99,7 @@ export function validatePercentageAllocation(
 ): GlobalConflictKind | null {
   const percentBySource = new Map<string, number>();
   for (const t of templates) {
-    if (t.type !== 'percentage') continue;
+    if (t.type !== 'percentage' || !t.category) continue;
     const key = `${t.previous}|${t.category.toLocaleLowerCase()}`;
     percentBySource.set(key, (percentBySource.get(key) ?? 0) + t.percent);
   }
