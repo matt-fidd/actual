@@ -11,6 +11,7 @@ ANZ
 aql
 AUR
 Authentik
+autogen
 AVERAGEA
 BANKA
 BANKINTER
@@ -123,6 +124,7 @@ lage
 LHV
 LHVBEE
 LKR
+lookback
 MAXA
 mbank
 mdc
@@ -159,6 +161,7 @@ RIED
 RSchedule
 RSD
 SEK
+shopt
 simplefin
 SKHSFI
 Sparkasse
