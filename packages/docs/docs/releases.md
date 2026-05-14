@@ -18,6 +18,7 @@ Release date: 2026-05-20
 - [#7750](https://github.com/actualbudget/actual/pull/7750) Added an `R` keyboard shortcut for the "Make transfer" action when two conjugate transactions are selected. — thanks @nikhilweee
 - [#7775](https://github.com/actualbudget/actual/pull/7775) Release custom themes as a stable feature. — thanks @MatissJanis
 - [#7804](https://github.com/actualbudget/actual/pull/7804) Release Crossover report — thanks @youngcw
+- [#7844](https://github.com/actualbudget/actual/pull/7844) Dummy — thanks @matt-fidd
 
 #### Enhancements
 
