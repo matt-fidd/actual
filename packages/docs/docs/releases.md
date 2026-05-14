@@ -4,7 +4,7 @@
 
 Release date: 2026-06-01
 
-- TODO: Add release highlights
+Some highlithes that are different, and badly spelled
 
 **Docker Tag: 26.5.3**
 
