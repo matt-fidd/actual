@@ -14,6 +14,7 @@ const options = {
   'package-json': {
     type: 'string',
     short: 'p',
+    multiple: true,
   },
   type: {
     type: 'string', // nightly, hotfix, monthly, auto
@@ -40,21 +41,26 @@ const { values } = parseArgs({
   allowPositionals: true,
 });
 
-const packageJsonPath = values['package-json'];
-if (!packageJsonPath) {
+const packageJsonPaths = values['package-json'];
+if (!packageJsonPaths || packageJsonPaths.length === 0) {
   fail(
     'Please specify the path to package.json using --package-json or -p option.',
   );
 }
 
 try {
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+  const firstPackageJson = JSON.parse(
+    fs.readFileSync(packageJsonPaths[0], 'utf8'),
+  );
 
-  if (!('version' in packageJson) || typeof packageJson.version !== 'string') {
+  if (
+    !('version' in firstPackageJson) ||
+    typeof firstPackageJson.version !== 'string'
+  ) {
     fail('The specified package.json does not contain a valid version field.');
   }
 
-  const currentVersion = packageJson.version;
+  const currentVersion = firstPackageJson.version;
 
   const explicitVersion = values.version;
   let newVersion;
@@ -80,13 +86,24 @@ try {
 
   process.stdout.write(newVersion);
 
-  if (values.update) {
-    packageJson.version = newVersion;
-    fs.writeFileSync(
-      packageJsonPath,
-      JSON.stringify(packageJson, null, 2) + '\n',
-      'utf8',
+  if (process.env.GITHUB_OUTPUT) {
+    const resolvedType = newVersion.includes('-nightly.')
+      ? 'nightly'
+      : newVersion.split('.')[2] === '0'
+        ? 'monthly'
+        : 'hotfix';
+    fs.appendFileSync(
+      process.env.GITHUB_OUTPUT,
+      `version=${newVersion}\ntype=${resolvedType}\n`,
     );
+  }
+
+  if (values.update) {
+    for (const path of packageJsonPaths) {
+      const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+      pkg.version = newVersion;
+      fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+    }
   }
 } catch (error) {
   fail(`Error: ${error instanceof Error ? error.message : String(error)}`);
