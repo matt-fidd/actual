@@ -44,3 +44,13 @@ To download the latest nightly desktop build:
 ### Nightly Docker Images
 
 If you run your own sync server with Docker, nightly images are also available. See the [`nightly` tag](../install/docker.md#nightly-tag) section of the Docker install guide for details.
+
+## Release Candidate Builds
+
+While a new release is being prepared, release candidate builds are published every day from the `release` branch. These let you test the exact code that is about to ship.
+
+- **Server:** the `rc` and `rc-alpine` [Docker tags](/docs/install/docker#docker-tags).
+- **npm packages:** the `rc` dist-tag, e.g. `npm install @actual-app/sync-server@rc`.
+- **Desktop app:** a `Release candidate` pre-release on the [GitHub releases page](https://github.com/actualbudget/actual/releases), with installers for macOS, Windows, and Linux that are refreshed daily.
+
+Release candidates are only available in the run-up to a release. As with nightly builds, keep a backup of your budget before trying them.
