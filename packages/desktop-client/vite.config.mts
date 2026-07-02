@@ -278,6 +278,9 @@ export default defineConfig(async ({ mode, command }) => {
     envPrefix: 'REACT_APP_',
     build: {
       minify: 'oxc',
+      // lightningcss (the default CSS minifier) has no prebuilt binary for
+      // sunos; esbuild does.
+      cssMinify: process.platform === 'sunos' ? 'esbuild' : undefined,
       target: 'es2022',
       sourcemap: true,
       outDir: mode === 'desktop' ? 'build-electron' : 'build',
