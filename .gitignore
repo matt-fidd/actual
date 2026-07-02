@@ -108,3 +108,6 @@ storybook-static
 .actualrc.yaml
 .actualrc.yml
 actual.config.js
+
+# Locally built rollup native binding for sunos (see vendor/rollup-sunos-x64)
+vendor/rollup-sunos-x64/*.node

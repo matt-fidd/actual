@@ -1,0 +1,14 @@
+diff --git a/dist/native.js b/dist/native.js
+index a7b1d74953fd66e2b1d6e337b6b519e18eb14bcf..5a13a8998828955194f00d4cc0dbaa06817f5839 100644
+--- a/dist/native.js
++++ b/dist/native.js
+@@ -81,6 +81,9 @@ const bindingsByPlatformAndArch = {
+ 	openharmony: {
+ 		arm64: { base: 'openharmony-arm64' }
+ 	},
++	sunos: {
++		x64: { base: 'sunos-x64' }
++	},
+ 	win32: {
+ 		arm64: { base: 'win32-arm64-msvc' },
+ 		ia32: { base: 'win32-ia32-msvc' },

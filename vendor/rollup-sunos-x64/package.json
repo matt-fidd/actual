@@ -1,0 +1,16 @@
+{
+  "name": "@rollup/rollup-sunos-x64",
+  "version": "4.62.2",
+  "description": "Locally built native bindings for Rollup on sunos-x64",
+  "license": "MIT",
+  "files": [
+    "rollup.sunos-x64.node"
+  ],
+  "os": [
+    "sunos"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "main": "./rollup.sunos-x64.node"
+}
