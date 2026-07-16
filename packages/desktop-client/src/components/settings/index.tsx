@@ -11,6 +11,7 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { css } from '@emotion/css';
 
 import { getLatestAppVersion } from '#app/appSlice';
@@ -19,10 +20,11 @@ import { Link } from '#components/common/Link';
 import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { Page } from '#components/Page';
-import { useServerVersion } from '#components/ServerContext';
+import { useServerURL, useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useNavigate } from '#hooks/useNavigate';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
@@ -121,6 +123,49 @@ function About() {
           </label>
         </Text>
       </View>
+    </Setting>
+  );
+}
+
+function SyncServerSettings() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const serverURL = useServerURL();
+  const [budgetId] = useMetadataPref('id');
+
+  const onConfigureServer = async () => {
+    await dispatch(closeBudget());
+    void navigate('/config-server', {
+      state: { returnToBudgetId: budgetId },
+    });
+  };
+
+  return (
+    <Setting
+      primaryAction={
+        <Button onPress={onConfigureServer}>
+          {serverURL ? (
+            <Trans>Change server</Trans>
+          ) : (
+            <Trans>Connect to a server</Trans>
+          )}
+        </Button>
+      }
+    >
+      <Text>
+        {serverURL ? (
+          <Trans>
+            <strong>Sync server:</strong> your budget syncs through{' '}
+            <strong>{{ serverURL } as TransObjectLiteral}</strong>.
+          </Trans>
+        ) : (
+          <Trans>
+            <strong>Sync server:</strong> not connected. Your budget lives only
+            on this device. Connecting a server keeps it in sync across your
+            devices and enables features like bank sync.
+          </Trans>
+        )}
+      </Text>
     </Setting>
   );
 }
@@ -235,6 +280,7 @@ export function Settings() {
           </View>
         )}
         <About />
+        <SyncServerSettings />
         <ThemeSettings />
         <FormatSettings />
         {isCurrencyExperimentalEnabled && <CurrencySettings />}

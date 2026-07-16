@@ -12,6 +12,7 @@ import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
 import { css } from '@emotion/css';
 
+import { loadBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { useServerURL, useSetServerURL } from '#components/ServerContext';
@@ -367,7 +368,13 @@ export function ConfigServer() {
   async function onSkip() {
     await setServerUrl(null);
     await dispatch(loggedIn());
-    void navigate('/');
+    const returnToBudgetId = location.state?.returnToBudgetId;
+    if (returnToBudgetId) {
+      await dispatch(loadBudget({ id: returnToBudgetId }));
+      void navigate('/settings');
+    } else {
+      void navigate('/');
+    }
   }
 
   const [syncServerConfig] = useGlobalPref('syncServerConfig');
@@ -388,9 +395,17 @@ export function ConfigServer() {
     <View style={{ maxWidth: 500, marginTop: -30 }}>
       {(userData || currentUrl) && (
         <MobileBackButton
-          onPress={() =>
-            location.key !== 'default' ? navigate(-1) : navigate('/')
-          }
+          onPress={async () => {
+            const returnToBudgetId = location.state?.returnToBudgetId;
+            if (returnToBudgetId) {
+              await dispatch(loadBudget({ id: returnToBudgetId }));
+              void navigate('/settings');
+            } else if (location.key !== 'default') {
+              void navigate(-1);
+            } else {
+              void navigate('/');
+            }
+          }}
           style={{
             position: 'fixed',
             top: 10,
