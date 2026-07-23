@@ -14,7 +14,7 @@ jobs:
       - uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
         with:
           stale-pr-message: 'This PR is stale because it has been open 14 days with no activity. Remove stale label or comment or this will be closed in 3 days.'
-          close-pr-message: 'This PR was closed because it has been stalled for 3 days with no activity.'
+          close-pr-message: 'This PR was closed because it has been stalled for 3 days with no activity. If you would like to resume working on this, please reach out to the maintainer team on Discord or leave a comment here to have it reopened.'
           days-before-stale: 14
           days-before-close: 3
           days-before-issue-stale: -1
