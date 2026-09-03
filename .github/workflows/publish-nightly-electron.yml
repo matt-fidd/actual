@@ -39,71 +39,15 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - if: ${{ startsWith(matrix.os, 'windows') }}
-        run: pip.exe install setuptools
-
-      - if: ${{ ! startsWith(matrix.os, 'windows') }}
-        run: |
-          mkdir .venv
-          python3 -m venv .venv
-          source .venv/bin/activate
-          python3 -m pip install setuptools
-
-      - name: Set up environment
-        uses: ./.github/actions/setup
+      - name: Build desktop app
+        uses: ./.github/actions/build-electron
         with:
-          # Avoid restoring potentially poisoned caches in release jobs.
-          cache: 'false'
-
-      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        name: Setup Flatpak dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install flatpak -y
-          sudo apt-get install flatpak-builder -y
-          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install org.freedesktop.Sdk//24.08 -y
-          sudo flatpak install org.freedesktop.Platform//24.08 -y
-          sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
-          sudo flatpak install org.flatpak.Builder -y
-
-          METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
-          TODAY=$(date +%Y-%m-%d)
-          VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/desktop-electron/package.json --type nightly)
-          sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
-          flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
-
-      - if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        name: Install arm64 cross-compilation toolchain
-        run: |
-          # better-sqlite3 has no Electron prebuilds for this Electron version,
-          # so the arm64 AppImage's native modules are cross-compiled from
-          # source. beforePackHook points CC_target/CXX_target at this
-          # toolchain during the arm64 pass.
-          sudo apt-get update
-          sudo apt-get install -y crossbuild-essential-arm64
-
-      - name: Update package versions
-        run: |
-          # Get new nightly version
-          NEW_DESKTOP_APP_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/desktop-electron/package.json --type nightly)
-
-          # Set package version
-          npm version $NEW_DESKTOP_APP_VERSION --no-git-tag-version --workspace=desktop-electron --no-workspaces-update
-
-      - name: Build Electron for Mac
-        if: ${{ startsWith(matrix.os, 'macos') }}
-        run: ./bin/package-electron --skip-translations
-        env:
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-
-      - name: Build Electron
-        if: ${{ ! startsWith(matrix.os, 'macos') }}
-        run: ./bin/package-electron --skip-translations
+          version-type: nightly
+          csc-key-password: ${{ secrets.CSC_KEY_PASSWORD }}
+          csc-link: ${{ secrets.CSC_LINK }}
+          apple-id: ${{ secrets.APPLE_ID }}
+          apple-app-specific-password: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          apple-team-id: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: Upload Linux x64 AppImage
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
